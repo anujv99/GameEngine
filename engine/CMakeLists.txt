@@ -1,11 +1,14 @@
 
+add_subdirectory(vendor/glfw)
+
 file(GLOB_RECURSE engine_source_files "src/*.*")
 
 add_library(Engine STATIC ${engine_source_files})
 
 target_precompile_headers(Engine PRIVATE "src/enginepch.h")
-target_include_directories(Engine PRIVATE "/src/")
-#target_compile_options(Engine PRIVATE -m64)
+target_include_directories(Engine PRIVATE "src" "vendor/glfw/include")
+
+target_link_libraries(Engine PRIVATE glfw)
 
 option(ENGINE_LOGGING "enable/disable logging" TRUE)
 option(ENGINE_ASSERT "enable/disable assertions" TRUE)
