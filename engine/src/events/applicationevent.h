@@ -14,7 +14,7 @@ namespace prev {
 		inline pvint GetWindowSizeX() const { return m_WindowSizeX; };
 		inline pvint GetWindowSizeY() const { return m_WindowSizeY; };
 		
-		virtual std::string ToString() const override {
+		virtual pvstring ToString() const override {
 			std::stringstream ss;
 			ss << "WindowResizeEvent: " << m_WindowSizeX << ", " << m_WindowSizeY;
 			return ss.str();
@@ -30,7 +30,7 @@ namespace prev {
 	public:
 		WindowCloseEvent() {}
 
-		virtual std::string ToString() const override {
+		virtual pvstring ToString() const override {
 			std::stringstream ss;
 			ss << "WindowCloseEvent";
 			return ss.str();
@@ -48,7 +48,7 @@ namespace prev {
 		inline pvint GetWindowPosX() const { return m_WindowPosX; }
 		inline pvint GetWindowPosY() const { return m_WindowPosY; }
 
-		virtual std::string ToString() const override {
+		virtual pvstring ToString() const override {
 			std::stringstream ss;
 			ss << "WindowMovedEvent: " << m_WindowPosX << ", " << m_WindowPosY;
 			return ss.str();

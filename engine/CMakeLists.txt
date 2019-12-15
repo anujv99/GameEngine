@@ -1,14 +1,16 @@
 
 add_subdirectory(vendor/glfw)
+add_subdirectory(vendor/glad)
 
 file(GLOB_RECURSE engine_source_files "src/*.*")
 
 add_library(Engine STATIC ${engine_source_files})
 
 target_precompile_headers(Engine PRIVATE "src/enginepch.h")
-target_include_directories(Engine PRIVATE "src" "vendor/glfw/include")
+target_include_directories(Engine PRIVATE "src" "vendor/glfw/include" "vendor/glad/include")
 
 target_link_libraries(Engine PRIVATE glfw)
+target_link_libraries(Engine PRIVATE GLAD)
 
 option(ENGINE_LOGGING "enable/disable logging" TRUE)
 option(ENGINE_ASSERT "enable/disable assertions" TRUE)
@@ -34,6 +36,19 @@ endif()
 
 if (WIN32)
 	add_compile_definitions(ENGINE_WINDOWS)
+
+	option(ENGINE_DIRECTX "enable/disable DirectX" TRUE)
+	option(ENGINE_OPENGL "enable/disable OpenGL" TRUE)
+
+	if (ENGINE_OPENGL)
+		add_compile_definitions(ENGINE_OPENGL)
+	endif()
+
+	if (ENGINE_DIRECTX)
+		add_compile_definitions(ENGINE_DIRECTX)
+		target_link_libraries(Engine PRIVATE d3d11 d3dcompiler)
+	endif()
 elseif(UNIX)
 	add_compile_definitions(ENGINE_LINUX)
+	add_compile_definitions(ENGINE_OPENGL)
 endif()

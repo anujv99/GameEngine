@@ -1,9 +1,15 @@
 #pragma once
 
+#include <functional>
+
 #include "../common/types.h"
 #include "../common/singleton.h"
 
+#include "../events/event.h"
+
 namespace prev {
+
+	typedef std::function<void(Event & e)> EventFunc;
 
 	class WindowProps {
 	public:
@@ -25,8 +31,10 @@ namespace prev {
 		Window() {}
 		virtual ~Window() {}
 	public:
-		virtual bool Create(const WindowProps & props) = 0;
+		virtual void Create(const WindowProps & props) = 0;
 		virtual void Update() = 0;
+		virtual void SetEventFunction(EventFunc eventFunc) = 0;
+		virtual pvptr GetRawWindowPtr() = 0;
 	private:
 		static Window * CreateWindow();
 	};

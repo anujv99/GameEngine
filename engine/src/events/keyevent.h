@@ -23,7 +23,7 @@ namespace prev {
 
 		inline pvbool IsRepeating() const { return m_Repeat; }
 
-		virtual std::string ToString() const override {
+		virtual pvstring ToString() const override {
 			std::stringstream ss;
 			ss << "KeyPressedEvent: " << m_KeyCode << " (" << m_Repeat << " repeats)";
 			return ss.str();
@@ -39,7 +39,7 @@ namespace prev {
 		KeyReleasedEvent(pvint keycode) :
 			KeyEvent(keycode) {}
 
-		virtual std::string ToString() const override {
+		virtual pvstring ToString() const override {
 			std::stringstream ss;
 			ss << "KeyReleasedEvent: " << m_KeyCode;
 			return ss.str();
@@ -55,7 +55,7 @@ namespace prev {
 
 		inline pvuchar GetPressedChar() const { return m_PressedChar; }
 
-		virtual std::string ToString() const override {
+		virtual pvstring ToString() const override {
 			std::stringstream ss;
 			ss << "CharacterEvent: " << m_PressedChar;
 			return ss.str();

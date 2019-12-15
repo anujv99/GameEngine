@@ -6,6 +6,9 @@
 
 #include "../common/types.h"
 
+#include <iostream>
+#include <functional>
+
 namespace prev {
 
 	enum class EventType {
@@ -39,7 +42,7 @@ namespace prev {
 		virtual EventType GetEventType() const = 0;
 		virtual const char * GetName() const = 0;
 		virtual int GetCategoryFlags() const = 0;
-		virtual std::string ToString() const { return GetName(); }
+		virtual pvstring ToString() const { return GetName(); }
 
 		inline bool IsInCategory(EventCategory category) {
 			return GetCategoryFlags() & category;
