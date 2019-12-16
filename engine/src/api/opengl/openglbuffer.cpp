@@ -5,10 +5,11 @@
 namespace prev {
 
 	DEFINE_OBJECT_OPENGL(VertexBuffer, const void * data, pvsizet size, pvuint stride, BufferUsage usage) {
-		return dynamic_cast<VertexBuffer *>(new OpenGLVertexBuffer(data, size, usage));
+		return dynamic_cast<VertexBuffer *>(new OpenGLVertexBuffer(data, size, stride, usage));
 	}
 
-	OpenGLVertexBuffer::OpenGLVertexBuffer(const void * data, pvsizet size, BufferUsage usage) : m_ID(0u), m_Layout(nullptr) {
+	OpenGLVertexBuffer::OpenGLVertexBuffer(const void * data, pvsizet size, pvuint stride, BufferUsage usage) : 
+		m_ID(0u), m_StrideBytes(stride), m_Layout(nullptr) {
 		ASSERT(size > 0);
 		glCreateBuffers(1, &m_ID);
 		glBindBuffer(GL_ARRAY_BUFFER, m_ID);
@@ -29,7 +30,7 @@ namespace prev {
 
 	void OpenGLVertexBuffer::SetBufferLayout(StrongHandle<BufferLayout> layout) {
 		if (layout == nullptr) {
-			DLOG_ERROR("Inavlid buffer layout");
+			LOG_ERROR("Inavlid buffer layout");
 			return;
 		}
 		m_Layout = layout;

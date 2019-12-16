@@ -17,7 +17,7 @@ namespace prev {
 	GLFWWindow::~GLFWWindow() {
 		glfwDestroyWindow(m_WindowProps.Window);
 		glfwTerminate();
-		DLOG_INFO("Window Destroyed");
+		LOG_INFO("Window Destroyed");
 	}
 
 	void GLFWWindow::Create(const WindowProps & props) {
@@ -39,12 +39,12 @@ namespace prev {
 		glfwSetWindowUserPointer(window, reinterpret_cast<void *>(this));
 
 		m_WindowProps.EventFunction = [](Event & e) -> void {
-			DLOG_INFO("%s", e.ToString().c_str());
+			LOG_INFO("%s", e.ToString().c_str());
 		};
 
 		SetCallbacks();
 
-		DLOG_INFO("Window Created. Size : [%d, %d], Title : %s", m_WindowProps.Width, m_WindowProps.Height, m_WindowProps.Title.c_str());
+		LOG_INFO("Window Created. Size : [%d, %d], Title : %s", m_WindowProps.Width, m_WindowProps.Height, m_WindowProps.Title.c_str());
 	}
 
 	void GLFWWindow::Update() {

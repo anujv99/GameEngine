@@ -24,12 +24,12 @@ namespace prev {
 		int status = gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress));
 		ASSERTM(status, "Failed to initialize GLAD");
 
-		DLOG_INFO("Successfully created OpenGL context");
+		LOG_INFO("[OpenGL] Successfully created OpenGL context");
 
-		DLOG_INFO("OpenGL Info:");
-		DLOG_INFO("\tVendor: %s", glGetString(GL_VENDOR));
-		DLOG_INFO("\tRenderer: %s", glGetString(GL_RENDERER));
-		DLOG_INFO("\tVersion: %s", glGetString(GL_VERSION));
+		LOG_INFO("OpenGL Info:");
+		LOG_INFO("\tVendor: %s", glGetString(GL_VENDOR));
+		LOG_INFO("\tRenderer: %s", glGetString(GL_RENDERER));
+		LOG_INFO("\tVersion: %s", glGetString(GL_VERSION));
 
 		GLint versionMajor, versionMinor;
 		glGetIntegerv(GL_MAJOR_VERSION, &versionMajor);

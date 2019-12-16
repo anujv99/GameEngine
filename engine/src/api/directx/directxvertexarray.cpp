@@ -50,6 +50,9 @@ namespace prev {
 		}
 
 		GetDeviceContext()->IASetInputLayout(m_InputLayout.Get());
+		for (pvsizet i = 0; i < m_VertexBuffers.size(); i++) {
+			m_VertexBuffers[i]->Bind(i);
+		}
 	}
 
 	void DirectXVertexArray::UnBind() {}
@@ -64,14 +67,19 @@ namespace prev {
 			m_InputDescs.back().SemanticName			= entry.Name.c_str();
 			m_InputDescs.back().SemanticIndex			= 0u;
 			m_InputDescs.back().Format					= GetDirectXType(entry.Type);
-			m_InputDescs.back().InputSlot				= 0u;
-			m_InputDescs.back().AlignedByteOffset		= D3D11_APPEND_ALIGNED_ELEMENT;
+			m_InputDescs.back().InputSlot				= m_VBOIndex;
+			m_InputDescs.back().AlignedByteOffset		= entry.OffsetBytes;
 			m_InputDescs.back().InputSlotClass			= D3D11_INPUT_PER_VERTEX_DATA;
 			m_InputDescs.back().InstanceDataStepRate	= 0u;
 		}
 
-		m_VertexBuffers.push_back(vertexBuffer);
+		m_VBOIndex++;
 
+		m_VertexBuffers.push_back(dynamic_cast<DirectXVertexBuffer *>(vertexBuffer.Get()));
+	}
+
+	void DirectXVertexArray::Draw(pvuint numElements) {
+		GetDeviceContext()->Draw(numElements, 0);
 	}
 
 }

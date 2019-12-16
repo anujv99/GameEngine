@@ -51,6 +51,8 @@ namespace prev {
 			LOG_ERROR("Unable to create vertex shader");
 			ASSERTM(false, "Fatal Error");
 		}
+
+		LOG_INFO("[DirectX] Vertex shader successfully created");
 	}
 
 	DirectXVertexShader::~DirectXVertexShader() {}
@@ -103,6 +105,8 @@ namespace prev {
 			LOG_ERROR("Unable to create pixel shader");
 			ASSERTM(false, "Fatal Error");
 		}
+
+		LOG_INFO("[DirectX] Fragment shader successfully created");
 	}
 
 	DirectXPixelShader::~DirectXPixelShader() {}
@@ -118,15 +122,15 @@ namespace prev {
 	}
 
 	DirectXShaderProgram::DirectXShaderProgram(StrongHandle<VertexShader> vShader, StrongHandle<FragmentShader> fShader) : 
-		m_VS(vShader), m_FS(fShader) {}
+		m_VS(dynamic_cast<DirectXVertexShader *>(vShader.Get())), m_PS(dynamic_cast<DirectXPixelShader *>(fShader.Get())) {
+		LOG_INFO("[DirectX] Shader Program successfully created");
+	}
 
 	DirectXShaderProgram::~DirectXShaderProgram() {}
 
 	void prev::DirectXShaderProgram::Bind() {
-		DirectXVertexShader * vs = dynamic_cast<DirectXVertexShader *>(m_VS.Get());
-		DirectXPixelShader * ps = dynamic_cast<DirectXPixelShader *>(m_FS.Get());
-		vs->Bind();
-		ps->Bind();
+		m_VS->Bind();
+		m_PS->Bind();
 	}
 
 }

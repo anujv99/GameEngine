@@ -22,6 +22,7 @@ namespace prev {
 		virtual void Bind() override;
 		virtual void UnBind() override;
 		virtual void AddVertexBuffer(const StrongHandle<VertexBuffer> vertexBuffer) override;
+		virtual void Draw(pvuint numElements) override;
 	private:
 		GLuint m_ID;
 		pvuint m_VBOIndex;

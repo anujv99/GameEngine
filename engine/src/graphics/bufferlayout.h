@@ -14,11 +14,10 @@ namespace prev {
 	pvuint GetSizeBytes(DataType type);
 
 	struct Entry {
+		pvstring Name;
 		DataType Type;
-		pvuint SizeBytes;
 		pvuint OffsetBytes;
 		pvbool Normalize;
-		pvstring Name;
 
 		pvuint GetNumElements() const;
 	};
@@ -29,12 +28,11 @@ namespace prev {
 		BufferLayout();
 		virtual ~BufferLayout() {}
 	public:
-		void BeginEntries(pvuint vertexSizeBytes);
+		void BeginEntries();
 		void AddEntry(DataType type, pvuint offsetBytes, pvstring semanticName, pvbool normalize = false);
 		void EndEntries();
 
 		inline pvuint GetNumEntries() const { return m_Entries.size(); }
-		inline pvuint GetStride() const { return m_Stride; }
 
 		inline std::vector<Entry>::const_iterator begin() const { return m_Entries.begin(); }
 		inline std::vector<Entry>::const_iterator end() const { return m_Entries.end(); }
@@ -43,7 +41,6 @@ namespace prev {
 
 		std::vector<Entry> m_Entries;
 		pvuint m_VertexSizeBytes;
-		pvuint m_Stride;
 		pvbool m_IsConstructing;
 	};
 

@@ -10,6 +10,8 @@
 	#define CHECK_HR(F, M) F
 #endif
 
+#include <comutil.h>
+
 namespace prev {
 
 	IFNOT_OPENGL(GraphicsAPI GraphicsContext::s_GraphicsAPI = GraphicsAPI::API_OPENGL);
@@ -43,6 +45,9 @@ namespace prev {
 
 		glfwGetWindowSize(m_WindowPtr, &width, &height);
 
+		HRESULT hr = CoInitialize(nullptr);
+		ASSERTM(hr == S_OK, "Unable to CoInitialize");
+
 		DXGI_MODE_DESC bd;
 		bd.Format					= DXGI_FORMAT_R8G8B8A8_UNORM;
 		bd.RefreshRate.Numerator	= 0;
@@ -57,7 +62,10 @@ namespace prev {
 		CreateDepthBuffer(bd);
 		CreateRasterizerState();
 
-		DLOG_INFO("Successfully created DirectX context");
+		LOG_INFO("[DirectX] Successfully created DirectX context");
+
+		LogInfo();
+
 	}
 
 	void DirectXContext::InitializeDirectX(DXGI_MODE_DESC bufferDesc) {
@@ -70,7 +78,7 @@ namespace prev {
 		scd.BufferCount			= 1;
 		scd.OutputWindow		= m_HWnd;
 		scd.Windowed			= TRUE;
-		scd.SwapEffect			= DXGI_SWAP_EFFECT_DISCARD;
+		scd.SwapEffect			= DXGI_SWAP_EFFECT_DISCARD; 
 		scd.Flags				= 0;
 
 		D3D_FEATURE_LEVEL featureLevels[] = {
@@ -116,7 +124,7 @@ namespace prev {
 		rd.DepthBiasClamp			= 0.0f;
 		rd.SlopeScaledDepthBias		= 0.0f;
 		rd.DepthClipEnable			= FALSE;
-		rd.ScissorEnable			= TRUE;
+		rd.ScissorEnable			= FALSE;
 		rd.MultisampleEnable		= FALSE;
 		rd.AntialiasedLineEnable	= FALSE;
 
@@ -168,6 +176,60 @@ namespace prev {
 			"Failed to create Depth Stencil View");
 		
 		m_DeviceContext->OMSetRenderTargets(1u, m_RenderTargetView.GetAddressOf(), m_DepthStencilView.Get());
+	}
+
+	void DirectXContext::LogInfo() {
+		
+		LOG_INFO("DirectX Info:");
+		
+		ComPtr<IDXGIFactory> factory;
+		ComPtr<IDXGIAdapter> adapter;
+
+		HRESULT hr = CreateDXGIFactory(__uuidof(IDXGIFactory), reinterpret_cast<void **>(factory.GetAddressOf()));
+
+		if (FAILED(hr)) {
+			LOG_ERROR("Unable to create IDXGIFactory");
+			return;
+		}
+		
+		hr = factory->EnumAdapters(0u, adapter.GetAddressOf());
+		if (FAILED(hr)) {
+			LOG_ERROR("Unable to get default adapter");
+			return;
+		}
+
+		DXGI_ADAPTER_DESC desc = {};
+
+		hr = adapter->GetDesc(&desc);
+		if (FAILED(hr)) {
+			LOG_ERROR("Unable to get adapter description");
+			return;
+		}
+
+		LOG_INFO("\tVendor: %s", static_cast<pvchar *>(_bstr_t(desc.Description)));
+		LOG_INFO("\tMemory: %uMB", static_cast<pvuint>(desc.DedicatedVideoMemory) / (1024u * 1024u));
+
+		D3D_FEATURE_LEVEL featureLevel = m_Device->GetFeatureLevel();
+
+		pvstring featureLevelStr;
+
+		switch (featureLevel) {
+			case D3D_FEATURE_LEVEL_9_1 : featureLevelStr = "Feature Level 9.1"; break;
+			case D3D_FEATURE_LEVEL_9_2 : featureLevelStr = "Feature Level 9.2"; break;
+			case D3D_FEATURE_LEVEL_9_3 : featureLevelStr = "Feature Level 9.3"; break;
+			case D3D_FEATURE_LEVEL_10_0: featureLevelStr = "Feature Level 10.0"; break;
+			case D3D_FEATURE_LEVEL_10_1: featureLevelStr = "Feature Level 10.1"; break;
+			case D3D_FEATURE_LEVEL_11_0: featureLevelStr = "Feature Level 11.0"; break;
+			case D3D_FEATURE_LEVEL_11_1: featureLevelStr = "Feature Level 11.1"; break;
+			case D3D_FEATURE_LEVEL_12_0: featureLevelStr = "Feature Level 12.0"; break;
+			case D3D_FEATURE_LEVEL_12_1: featureLevelStr = "Feature Level 12.1"; break;
+		default:
+			ASSERTM(false, "Invalid DirectX Feature Level");
+			break;
+		}
+
+		LOG_INFO("\tVersion: %s", featureLevelStr.c_str());
+
 	}
 
 }

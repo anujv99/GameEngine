@@ -7,7 +7,7 @@ namespace prev {
     }
 
 	pvuint prev::GetSizeBytes(DataType type) {
-		switch (type) {
+        switch (type) {
         case prev::DataType::Int:       return 4;
         case prev::DataType::Int2:      return 4 * 2;
         case prev::DataType::Int3:      return 4 * 3;
@@ -18,15 +18,13 @@ namespace prev {
         case prev::DataType::Float4:    return 4 * 4;
         case prev::DataType::Bool:      return 1;
 		}
-
         ASSERTM(false, "Inavlid data type");
         return 0;
     }
 
-    BufferLayout::BufferLayout() : m_Entries(), m_VertexSizeBytes(0u), m_Stride(0u), m_IsConstructing(false) {}
+    BufferLayout::BufferLayout() : m_Entries(), m_VertexSizeBytes(0u), m_IsConstructing(false) {}
 
-    void BufferLayout::BeginEntries(pvuint vertexSizeBytes) {
-        m_VertexSizeBytes = vertexSizeBytes;
+    void BufferLayout::BeginEntries() {
         m_IsConstructing = true;
     }
 
@@ -37,11 +35,8 @@ namespace prev {
         entry.Type          = type;
         entry.OffsetBytes   = offsetBytes;
         entry.Normalize     = normalize;
-        entry.SizeBytes     = GetSizeBytes(entry.Type);
         entry.Name          = semanticName;
         
-        if (entry.OffsetBytes + entry.SizeBytes > m_Stride) m_Stride = entry.OffsetBytes + entry.SizeBytes;
-
         m_Entries.push_back(entry);
     }
 

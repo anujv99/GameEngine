@@ -61,6 +61,11 @@ namespace prev {
 		GetDeviceContext()->IASetVertexBuffers(0, 1, m_Buffer.GetAddressOf(), (UINT *)&m_StrideBytes, &OFFSET);
 	}
 
+	void DirectXVertexBuffer::Bind(pvuint slot) const {
+		const static UINT OFFSET = 0;
+		GetDeviceContext()->IASetVertexBuffers(slot, 1, m_Buffer.GetAddressOf(), (UINT *)&m_StrideBytes, &OFFSET);
+	}
+
 	void DirectXVertexBuffer::UnBind() const {
 		static ComPtr<ID3D11Buffer> BUFFER;
 		const static UINT OFFSET = 0;
@@ -69,7 +74,7 @@ namespace prev {
 
 	void DirectXVertexBuffer::SetBufferLayout(StrongHandle<BufferLayout> layout) {
 		if (layout == nullptr) {
-			DLOG_ERROR("Inavlid buffer layout");
+			LOG_ERROR("Inavlid buffer layout");
 			return;
 		}
 		m_Layout = layout;

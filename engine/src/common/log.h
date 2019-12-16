@@ -14,20 +14,6 @@
 	#define LOG_COLOR_RESET()			prev::Logger::ChangeColor(prev::LoggerColor::COLOR_ORIGINAL)
 
 	#define LOG(...) prev::Logger::Log(__VA_ARGS__)
-
-	#ifdef ENGINE_DEBUG
-		#define DLOG_TRACE(...)	LOG_CHANGE_COLOR_CYAN();	LOG("[DLOG] "); LOG(__VA_ARGS__); LOG_COLOR_RESET(); LOG("\n")
-		#define DLOG_INFO(...)	LOG_CHANGE_COLOR_GREEN();	LOG("[DLOG] "); LOG(__VA_ARGS__); LOG_COLOR_RESET(); LOG("\n")
-		#define DLOG_WARN(...)	LOG_CHANGE_COLOR_YELLOW();	LOG("[DLOG] "); LOG(__VA_ARGS__); LOG_COLOR_RESET(); LOG("\n")
-		#define DLOG_ERROR(...)	LOG_CHANGE_COLOR_RED();		LOG("[DLOG] "); LOG(__VA_ARGS__); LOG_COLOR_RESET(); LOG("\n")
-		#define DLOG_FATAL(...)	LOG_CHANGE_COLOR_MAGENTA(); LOG("[DLOG] "); LOG(__VA_ARGS__); LOG_COLOR_RESET(); LOG("\n")
-	#else
-		#define DLOG_TRACE(F, ...)
-		#define DLOG_INFO(F, ...)
-		#define DLOG_WARN(F, ...)
-		#define DLOG_ERROR(F, ...)
-		#define DLOG_FATAL(F, ...)
-	#endif
 	
 	#define LOG_TRACE(...)	LOG_CHANGE_COLOR_CYAN();	LOG("[LOG] "); LOG(__VA_ARGS__);  LOG_COLOR_RESET(); LOG("\n")
 	#define LOG_INFO(...)	LOG_CHANGE_COLOR_GREEN();	LOG("[LOG] "); LOG(__VA_ARGS__);  LOG_COLOR_RESET(); LOG("\n")
@@ -35,12 +21,6 @@
 	#define LOG_ERROR(...)	LOG_CHANGE_COLOR_RED();		LOG("[LOG] "); LOG(__VA_ARGS__);  LOG_COLOR_RESET(); LOG("\n")
 	#define LOG_FATAL(...)	LOG_CHANGE_COLOR_MAGENTA(); LOG("[LOG] "); LOG(__VA_ARGS__);  LOG_COLOR_RESET(); LOG("\n")
 #else
-	#define DLOG_TRACE(F, ...)
-	#define DLOG_INFO(F, ...)
-	#define DLOG_WARN(F, ...)
-	#define DLOG_ERROR(F, ...)
-	#define DLOG_FATAL(F, ...)
-
 	#define LOG_TRACE(F, ...)
 	#define LOG_INFO(F, ...)
 	#define LOG_WARN(F, ...)

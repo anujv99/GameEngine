@@ -50,8 +50,8 @@ namespace prev {
 		virtual void Bind() override;
 		virtual void UnBind() override {};
 	private:
-		StrongHandle<VertexShader> m_VS;
-		StrongHandle<FragmentShader> m_FS;
+		StrongHandle<DirectXVertexShader> m_VS;
+		StrongHandle<DirectXPixelShader> m_PS;
 	};
 
 }

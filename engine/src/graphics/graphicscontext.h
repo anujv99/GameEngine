@@ -5,52 +5,7 @@
 #include "../common/log.h"
 #include "../common/types.h"
 
-#ifdef ENGINE_OPENGL
-	#define IF_OPENGL(X) X
-	#define IFNOT_OPENGL(X)
-#else
-	#define IF_OPENGL(X)
-	#define IFNOT_OPENGL(X) X
-#endif
-
-#ifdef ENGINE_DIRECTX
-	#define IF_DIRECTX(X) X
-	#define IFNOT_DIRECTX(X)
-#else
-	#define IF_DIRECTX(X)
-	#define IFNOT_DIRECTX(X) X
-#endif
-
-#define DECLARE_OBJECT(X, ...)	static StrongHandle<X> Create(__VA_ARGS__);\
-								private:\
-									IF_OPENGL(static X * CreateOpenGL##X(__VA_ARGS__));\
-									IF_DIRECTX(static X * CreateDirectX##X(__VA_ARGS__));
-
-#define DEFINE_OBJECT_START(X, ...) StrongHandle<X> X::Create(__VA_ARGS__) {
-#define DEFINE_OBJECT_BODY(X, ...)\
-	switch (GraphicsContext::Ref().GetAPI()) {\
-		case GraphicsAPI::API_OPENGL:\
-		{\
-			IFNOT_OPENGL(ASSERT(false, "Failed to create " #X ". Inavlid GraphicsAPI"));\
-			IF_OPENGL(return X::CreateOpenGL##X(__VA_ARGS__));\
-		}\
-		case GraphicsAPI::API_DIRECTX:\
-		{\
-			IFNOT_DIRECTX(ASSERT(false, "Failed to create "#X". Inavlid GraphicsAPI"));\
-			IF_DIRECTX(return X::CreateDirectX##X(__VA_ARGS__));\
-		}\
-		default:\
-		{\
-			IFNOT_DIRECTX(ASSERT(false, "Failed to create "#X". Inavlid GraphicsAPI"));\
-			break;\
-		}\
-		}\
-		\
-		return nullptr;
-#define DEFINE_OBJECT_END(X) }
-
-#define DEFINE_OBJECT_OPENGL(X, ...) X * X::CreateOpenGL##X(__VA_ARGS__)
-#define DEFINE_OBJECT_DIRECTX(X, ...) X * X::CreateDirectX##X(__VA_ARGS__)
+#include "helper.h"
 
 namespace prev {
 

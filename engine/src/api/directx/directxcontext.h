@@ -34,6 +34,8 @@ namespace prev {
 		void CreateRenderTargetView();
 		void CreateRasterizerState();
 		void CreateDepthBuffer(DXGI_MODE_DESC bufferDesc);
+
+		void LogInfo();
 	private:
 		::GLFWwindow * m_WindowPtr;
 		::HWND m_HWnd;

@@ -2,6 +2,8 @@
 
 #ifdef ENGINE_OPENGL
 
+#include "openglrenderstate.h"
+
 namespace prev {
 	
 	GLenum GetOpenGLType(DataType dataType) {
@@ -52,17 +54,21 @@ namespace prev {
 		for (const auto & entry : *layout) {
 			glEnableVertexAttribArray(m_VBOIndex);
 			glVertexAttribPointer(
-				m_VBOIndex, 
-				entry.GetNumElements(), 
-				GetOpenGLType(entry.Type), 
+				m_VBOIndex,
+				entry.GetNumElements(),
+				GetOpenGLType(entry.Type),
 				entry.Normalize ? GL_TRUE : GL_FALSE,
-				layout->GetStride(),
+				vertexBuffer->GetStride(),
 				reinterpret_cast<const void*>(entry.OffsetBytes)
 			);
 			m_VBOIndex++;
 		}
-
+		
 		m_VertexBuffers.push_back(vertexBuffer);
+	}
+
+	void OpenGLVertexArray::Draw(pvuint numElements) {
+		glDrawArrays(dynamic_cast<OpenGLRenderState *>(OpenGLRenderState::Get())->GetOpenGLTopology(), 0, numElements);
 	}
 
 }

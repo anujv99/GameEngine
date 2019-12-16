@@ -46,7 +46,7 @@ if (WIN32)
 
 	if (ENGINE_DIRECTX)
 		add_compile_definitions(ENGINE_DIRECTX)
-		target_link_libraries(Engine PRIVATE d3d11 d3dcompiler)
+		target_link_libraries(Engine PRIVATE d3d11 d3dcompiler dxgi comsuppw)
 	endif()
 elseif(UNIX)
 	add_compile_definitions(ENGINE_LINUX)

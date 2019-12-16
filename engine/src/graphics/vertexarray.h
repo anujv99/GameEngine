@@ -18,6 +18,7 @@ namespace prev {
 		virtual void Bind() = 0;
 		virtual void UnBind() = 0;
 		virtual void AddVertexBuffer(const StrongHandle<VertexBuffer> vertexBuffer) = 0;
+		virtual void Draw(pvuint numElements) = 0;
 	public:
 		DECLARE_OBJECT(VertexArray, StrongHandle<VertexShader> vShader); // Vertex Shader Required By DirectX
 	};

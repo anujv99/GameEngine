@@ -19,6 +19,11 @@ namespace prev {
 		virtual void UnBind() const override;
 		virtual void SetBufferLayout(StrongHandle<BufferLayout> layout) override;
 		virtual const StrongHandle<BufferLayout> GetLayout() const override { return m_Layout; }
+		virtual pvuint GetStride() const override { return m_StrideBytes; };
+
+		void Bind(pvuint slot) const;
+
+		inline ComPtr<ID3D11Buffer> GetBuffer() { return m_Buffer; }
 	private:
 		StrongHandle<BufferLayout> m_Layout;
 		pvuint m_StrideBytes;

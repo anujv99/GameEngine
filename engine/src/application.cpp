@@ -1,16 +1,14 @@
 #include "application.h"
 
 #include "core/window.h"
+
 #include "graphics/graphicscontext.h"
+#include "graphics/renderstate.h"
 
 #include "graphics/buffer.h"
 #include "graphics/shader.h"
 #include "graphics/bufferlayout.h"
 #include "graphics/vertexarray.h"
-
-#include "debug/instrumentor.h"
-
-#include "api/directx/directxhelper.h"
 
 namespace prev {
 
@@ -22,7 +20,7 @@ namespace prev {
 
 		PV_PROFILE_FUNCTION();
 
-		GraphicsContext::SetGraphicsAPI(GraphicsAPI::API_DIRECTX);
+		GraphicsContext::SetGraphicsAPI(GraphicsAPI::API_OPENGL);
 
 		Window::CreateInst();
 		Window::Ref().Create(WindowProps(1280, 720, "Game Engine Window"));
@@ -31,20 +29,25 @@ namespace prev {
 		GraphicsContext::CreateInst();
 		GraphicsContext::Ref().CreateContext(Window::Ref().GetRawWindowPtr());
 
-		float arr[] = {
-			 0.0f,  0.5f,
-			 0.5f, -0.5f,
-			-0.5f, -0.5f,
+		RenderState::CreateInst();
+		RenderState::Ref().SetTopology(PrimitiveTopology::TOPOLOGY_TRIANGLE);
+		RenderState::Ref().SetViewport({ 0.0f, 0.0f, 1280.0f, 720.0f, 0.0f, 1.0f });
+
+		float vertex[] = {
+			 0.0f,  0.5f, 1.0f, 0.0f, 0.0f, 1.0f,
+			 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f,
+			-0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f,
 		};
 
-		auto b = VertexBuffer::Create(arr, sizeof(arr), 2 * sizeof(float), BufferUsage::USAGE_STATIC);
+		auto bv = VertexBuffer::Create(vertex, sizeof(vertex), 6 * sizeof(float), BufferUsage::USAGE_STATIC);
 
-		auto l = BufferLayout::Create();
-		l->BeginEntries(2 * sizeof(float));
-		l->AddEntry(DataType::Float2, 0u, "POSITION");
-		l->EndEntries();
+		auto lv = BufferLayout::Create();
+		lv->BeginEntries();
+		lv->AddEntry(DataType::Float2, 0u, "POSITION");
+		lv->AddEntry(DataType::Float4, 2u * sizeof(float), "INCOLOR");
+		lv->EndEntries();
 
-		b->SetBufferLayout(l);
+		bv->SetBufferLayout(lv);
 
 		StrongHandle<VertexShader> v;
 		StrongHandle<FragmentShader> f;
@@ -56,8 +59,12 @@ namespace prev {
 					#version 450 core
 					
 					layout (location = 0) in vec2 aPos;
+					layout (location = 1) in vec4 aColor;
+					
+					out vec4 aColorPass;
 
 					void main() {
+						aColorPass = aColor;
 						gl_Position = vec4(aPos, 0.0f, 1.0f);
 					}
 				)"
@@ -69,8 +76,10 @@ namespace prev {
 					
 					out vec4 FragColor;
 
+					in vec4 aColorPass;
+
 					void main() {
-						FragColor = vec4(1.0f);
+						FragColor = aColorPass;
 					}
 				)"
 			);
@@ -78,38 +87,39 @@ namespace prev {
 		}  else {
 			v = VertexShader::Create(
 				R"(
-					float4 main(float2 pos : POSITION) : SV_POSITION {
-						return float4(pos.x, pos.y, 0.0f, 1.0f);
+					struct VSOut {
+						float4 aPos : SV_POSITION;
+						float4 aColor : COLOR;
+					};
+
+					VSOut main(float2 pos : POSITION, float4 color : INCOLOR) {
+						VSOut vso;
+						vso.aPos = float4(pos.x, pos.y, 0.0f, 1.0f);
+						vso.aColor = color;
+						return vso;
 					}
 				)"
 			);
 
 			f = FragmentShader::Create(
 				R"(
-					float4 main() : SV_TARGET {
-						return float4(1.0f, 1.0f, 1.0f, 1.0f);
+					struct VSIn {
+						float4 aPos : SV_POSITION;
+						float4 aColor : COLOR;
+					};
+					
+					float4 main(VSIn vsi) : SV_TARGET {
+						return float4(vsi.aColor);
 					}
 				)"
 			);
+
 		}
 
 		s = ShaderProgram::Create(v, f);
 
 		a = VertexArray::Create(v);
-		a->AddVertexBuffer(b);
-
-		GetDeviceContext()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-		D3D11_VIEWPORT vp;
-		vp.TopLeftX = -1.0f;
-		vp.TopLeftY = 1.0f;
-		vp.Width = 2.0f;
-		vp.Height = 2.0f;
-		vp.MinDepth = 0.0f;
-		vp.MaxDepth = 1.0f;
-
-		GetDeviceContext()->RSSetViewports(1, &vp);
-
+		a->AddVertexBuffer(bv);
 	}
 
 	Application::~Application() {
@@ -129,7 +139,7 @@ namespace prev {
 			a->Bind();
 			s->Bind();
 
-			GetDeviceContext()->Draw(3, 0);
+			a->Draw(3);
 
 			GraphicsContext::Ref().EndFrame();
 			Window::Ref().Update();

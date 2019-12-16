@@ -47,7 +47,7 @@ namespace prev {
 
 	OpenGLVertexShader::OpenGLVertexShader(const pvstring & source) : m_ID(0u) {
 		m_ID = CreateAndCompileShader(GL_VERTEX_SHADER, source);
-		LOG_INFO("Vertex shader successfully created");
+		LOG_INFO("[OpenGL] Vertex shader successfully created");
 	}
 
 	OpenGLVertexShader::~OpenGLVertexShader() {
@@ -62,7 +62,7 @@ namespace prev {
 
 	OpenGLFragmentShader::OpenGLFragmentShader(const pvstring & source) {
 		m_ID = CreateAndCompileShader(GL_FRAGMENT_SHADER, source);
-		LOG_INFO("Fragment shader successfully created");
+		LOG_INFO("[OpenGL] Fragment shader successfully created");
 	}
 
 	OpenGLFragmentShader::~OpenGLFragmentShader() {
@@ -102,7 +102,7 @@ namespace prev {
 		m_VS = vShader;
 		m_FS = fShader;
 
-		LOG_INFO("Shader program successfully created");
+		LOG_INFO("[OpenGL] Shader program successfully created");
 	}
 
 	OpenGLShaderProgram::~OpenGLShaderProgram() {
