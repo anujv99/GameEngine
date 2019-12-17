@@ -8,7 +8,10 @@ namespace prev {
 		return dynamic_cast<VertexBuffer *>(new DirectXVertexBuffer(data, size, stride, usage));
 	}
 
-	DirectXVertexBuffer::DirectXVertexBuffer(const void * data, pvsizet size, pvuint stride, BufferUsage usage) : m_StrideBytes(stride) {
+	DirectXVertexBuffer::DirectXVertexBuffer(const void * data, pvsizet size, pvuint stride, BufferUsage usage) :
+		m_StrideBytes(stride), m_Usage(usage), m_Size(size) {
+		PV_PROFILE_FUNCTION();
+
 		ASSERT(size > 0);
 
 		UINT cpuAccess = 0u;
@@ -21,7 +24,7 @@ namespace prev {
 			cpuAccess = D3D11_CPU_ACCESS_WRITE;
 			break;
 		case prev::BufferUsage::USAGE_STREAM:
-			cpuAccess = D3D11_CPU_ACCESS_READ;
+			cpuAccess = D3D11_CPU_ACCESS_WRITE;
 			break;
 		default:
 			break;
@@ -57,19 +60,35 @@ namespace prev {
 	}
 
 	void DirectXVertexBuffer::Bind() const {
+		PV_PROFILE_FUNCTION();
 		const static UINT OFFSET = 0;
 		GetDeviceContext()->IASetVertexBuffers(0, 1, m_Buffer.GetAddressOf(), (UINT *)&m_StrideBytes, &OFFSET);
 	}
 
 	void DirectXVertexBuffer::Bind(pvuint slot) const {
+		PV_PROFILE_FUNCTION();
 		const static UINT OFFSET = 0;
 		GetDeviceContext()->IASetVertexBuffers(slot, 1, m_Buffer.GetAddressOf(), (UINT *)&m_StrideBytes, &OFFSET);
 	}
 
 	void DirectXVertexBuffer::UnBind() const {
+		PV_PROFILE_FUNCTION();
 		static ComPtr<ID3D11Buffer> BUFFER;
 		const static UINT OFFSET = 0;
 		GetDeviceContext()->IASetVertexBuffers(0, 1, BUFFER.GetAddressOf(), (UINT *)&m_StrideBytes, &OFFSET);
+	}
+
+	void DirectXVertexBuffer::SubData(const void * data, pvsizet size, pvsizet offset) {
+		PV_PROFILE_FUNCTION();
+		ASSERT(data);
+		ASSERTM(m_Usage == BufferUsage::USAGE_DYNAMIC || m_Usage == BufferUsage::USAGE_STREAM, "Cannot use SubData on buffer with Static usage");
+
+		D3D11_MAPPED_SUBRESOURCE msr;
+
+		HRESULT hr = GetDeviceContext()->Map(m_Buffer.Get(), 0u, D3D11_MAP_WRITE_DISCARD, 0u, &msr);
+		ASSERTM(hr == S_OK, "Unable to map vertex buffer for writing");
+		memcpy_s(msr.pData, static_cast<rsize_t>(m_Size), data, static_cast<rsize_t>(size));
+		GetDeviceContext()->Unmap(m_Buffer.Get(), 0u);
 	}
 
 	void DirectXVertexBuffer::SetBufferLayout(StrongHandle<BufferLayout> layout) {
@@ -83,7 +102,7 @@ namespace prev {
 	D3D11_USAGE GetDirectXType(BufferUsage usage) {
 		switch (usage) {
 		case prev::BufferUsage::USAGE_STATIC:
-			return D3D11_USAGE_DEFAULT;
+			return D3D11_USAGE_IMMUTABLE;
 		case prev::BufferUsage::USAGE_DYNAMIC:
 			return D3D11_USAGE_DYNAMIC;
 		case prev::BufferUsage::USAGE_STREAM:

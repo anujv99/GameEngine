@@ -1,5 +1,7 @@
 #include "directxrenderstate.h"
 
+#ifdef ENGINE_DIRECTX
+
 namespace prev {
 
 	D3D_PRIMITIVE_TOPOLOGY GetDirectXType(PrimitiveTopology topology) {
@@ -53,3 +55,5 @@ namespace prev {
 	}
 
 }
+
+#endif

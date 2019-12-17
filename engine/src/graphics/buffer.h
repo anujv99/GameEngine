@@ -22,8 +22,9 @@ namespace prev {
 	public:
 		virtual void Bind() const = 0;
 		virtual void UnBind() const = 0;
-		virtual void SetBufferLayout(StrongHandle<BufferLayout> layout) = 0;
+		virtual void SubData(const void * data, pvsizet size, pvsizet offset) = 0;
 		virtual const StrongHandle<BufferLayout> GetLayout() const = 0;
+		virtual void SetBufferLayout(StrongHandle<BufferLayout> layout) = 0;
 		virtual pvuint GetStride() const = 0;
 
 		DECLARE_OBJECT(VertexBuffer, const void * data, pvsizet size, pvuint stride, BufferUsage usage);

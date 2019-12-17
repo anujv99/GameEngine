@@ -10,10 +10,9 @@
 #include "graphics/bufferlayout.h"
 #include "graphics/vertexarray.h"
 
-namespace prev {
+#include "renderer/renderer2d.h"
 
-	StrongHandle<ShaderProgram> s;
-	StrongHandle<VertexArray> a;
+namespace prev {
 
 	Application::Application() : m_IsWindowOpen(true) {
 		PV_PROFILE_BEGIN_SESSION("EveryThing", "gg.json");
@@ -33,96 +32,11 @@ namespace prev {
 		RenderState::Ref().SetTopology(PrimitiveTopology::TOPOLOGY_TRIANGLE);
 		RenderState::Ref().SetViewport({ 0.0f, 0.0f, 1280.0f, 720.0f, 0.0f, 1.0f });
 
-		float vertex[] = {
-			 0.0f,  0.5f, 1.0f, 0.0f, 0.0f, 1.0f,
-			 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f,
-			-0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f,
-		};
-
-		auto bv = VertexBuffer::Create(vertex, sizeof(vertex), 6 * sizeof(float), BufferUsage::USAGE_STATIC);
-
-		auto lv = BufferLayout::Create();
-		lv->BeginEntries();
-		lv->AddEntry(DataType::Float2, 0u, "POSITION");
-		lv->AddEntry(DataType::Float4, 2u * sizeof(float), "INCOLOR");
-		lv->EndEntries();
-
-		bv->SetBufferLayout(lv);
-
-		StrongHandle<VertexShader> v;
-		StrongHandle<FragmentShader> f;
-
-		if (GraphicsContext::GetAPI() == GraphicsAPI::API_OPENGL) {
-
-			v = VertexShader::Create(
-				R"(
-					#version 450 core
-					
-					layout (location = 0) in vec2 aPos;
-					layout (location = 1) in vec4 aColor;
-					
-					out vec4 aColorPass;
-
-					void main() {
-						aColorPass = aColor;
-						gl_Position = vec4(aPos, 0.0f, 1.0f);
-					}
-				)"
-			);
-
-			f = FragmentShader::Create(
-				R"(
-					#version 450 core
-					
-					out vec4 FragColor;
-
-					in vec4 aColorPass;
-
-					void main() {
-						FragColor = aColorPass;
-					}
-				)"
-			);
-
-		}  else {
-			v = VertexShader::Create(
-				R"(
-					struct VSOut {
-						float4 aPos : SV_POSITION;
-						float4 aColor : COLOR;
-					};
-
-					VSOut main(float2 pos : POSITION, float4 color : INCOLOR) {
-						VSOut vso;
-						vso.aPos = float4(pos.x, pos.y, 0.0f, 1.0f);
-						vso.aColor = color;
-						return vso;
-					}
-				)"
-			);
-
-			f = FragmentShader::Create(
-				R"(
-					struct VSIn {
-						float4 aPos : SV_POSITION;
-						float4 aColor : COLOR;
-					};
-					
-					float4 main(VSIn vsi) : SV_TARGET {
-						return float4(vsi.aColor);
-					}
-				)"
-			);
-
-		}
-
-		s = ShaderProgram::Create(v, f);
-
-		a = VertexArray::Create(v);
-		a->AddVertexBuffer(bv);
+		Renderer2D::CreateInst();
 	}
 
 	Application::~Application() {
+		Renderer2D::DestroyInst();
 		GraphicsContext::DestroyInst();
 		Window::DestroyInst();
 
@@ -136,12 +50,14 @@ namespace prev {
 
 			GraphicsContext::Ref().BeginFrame();
 
-			a->Bind();
-			s->Bind();
+			for (auto & layer : m_LayerStack) {
+				layer->OnUpdate(0.0f);
+			}
 
-			a->Draw(3);
+			Renderer2D::Ref().Render();
 
 			GraphicsContext::Ref().EndFrame();
+
 			Window::Ref().Update();
 		}
 	}

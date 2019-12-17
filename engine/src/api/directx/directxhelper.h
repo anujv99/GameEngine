@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef ENGINE_DIRECTX
+
 #include <d3d11.h>
 #include <dxgi.h>
 
@@ -18,3 +20,5 @@ namespace prev {
 	}
 
 }
+
+#endif

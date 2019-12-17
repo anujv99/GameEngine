@@ -10,7 +10,7 @@
 
 namespace prev {
 
-	DXGI_FORMAT GetDirectXType(DataType dataType);
+	DXGI_FORMAT GetDirectXType(DataType dataType, pvbool normalize);
 
 	class DirectXVertexArray : public VertexArray {
 	public:

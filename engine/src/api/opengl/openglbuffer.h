@@ -17,6 +17,7 @@ namespace prev{
 	public:
 		virtual void Bind() const override;
 		virtual void UnBind() const override;
+		virtual void SubData(const void * data, pvsizet size, pvsizet offset) override;
 		virtual void SetBufferLayout(StrongHandle<BufferLayout> layout) override;
 		virtual const StrongHandle<BufferLayout> GetLayout() const override { return m_Layout; }
 		virtual pvuint GetStride() const override { return m_StrideBytes; };

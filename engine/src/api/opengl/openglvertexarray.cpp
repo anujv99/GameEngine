@@ -12,11 +12,21 @@ namespace prev {
 		case prev::DataType::Int2:		return GL_INT;
 		case prev::DataType::Int3:		return GL_INT;
 		case prev::DataType::Int4:		return GL_INT;
+		case prev::DataType::UInt:		return GL_UNSIGNED_INT;
+		case prev::DataType::UInt2:		return GL_UNSIGNED_INT;
+		case prev::DataType::UInt3:		return GL_UNSIGNED_INT;
+		case prev::DataType::UInt4:		return GL_UNSIGNED_INT;
 		case prev::DataType::Float:		return GL_FLOAT;
 		case prev::DataType::Float2:	return GL_FLOAT;
 		case prev::DataType::Float3:	return GL_FLOAT;
 		case prev::DataType::Float4:	return GL_FLOAT;
 		case prev::DataType::Bool:		return GL_BOOL;
+		case prev::DataType::UByte:		return GL_UNSIGNED_BYTE;
+		case prev::DataType::UByte2:	return GL_UNSIGNED_BYTE;
+		case prev::DataType::UByte4:	return GL_UNSIGNED_BYTE;
+		case prev::DataType::Byte:		return GL_BYTE;
+		case prev::DataType::Byte2:		return GL_BYTE;
+		case prev::DataType::Byte4:		return GL_BYTE;
 		}
 
 		ASSERTM(false, "Inavlid data type");

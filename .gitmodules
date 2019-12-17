@@ -1,3 +1,6 @@
 [submodule "engine/vendor/glfw"]
 	path = engine/vendor/glfw
 	url = https://github.com/preversewharf45/glfw
+[submodule "engine/vendor/prevmath"]
+	path = engine/vendor/prevmath
+	url = https://github.com/preversewharf45/PrevMath

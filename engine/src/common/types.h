@@ -12,7 +12,9 @@ namespace prev {
 
 	typedef float pvfloat;
 
+	typedef int8_t pvbyte;
 	typedef int32_t pvint;
+	typedef uint8_t pvubyte;
 	typedef uint32_t pvuint;
 	typedef size_t pvsizet;
 

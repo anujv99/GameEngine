@@ -8,6 +8,10 @@
 #include "../src/common/logger.h"
 #include "../src/common/log.h"
 
+#include "../src/math/math.h"
+
+#include "../src/renderer/renderer2d.h"
+
 //--------------- TEMP ---------------
 
 //------------------------------------

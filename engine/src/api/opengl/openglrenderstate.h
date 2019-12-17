@@ -1,8 +1,10 @@
 #pragma once
 
+#ifdef ENGINE_OPENGL
+
 #include "graphics/renderstate.h"
 
-#include <glad\glad.h>
+#include <glad/glad.h>
 
 namespace prev {
 
@@ -28,3 +30,5 @@ namespace prev {
 	};
 
 }
+
+#endif

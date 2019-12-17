@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef ENGINE_DIRECTX
+
 #include "graphics/renderstate.h"
 
 #include "directxhelper.h"
@@ -24,3 +26,5 @@ namespace prev {
 	};
 
 }
+
+#endif

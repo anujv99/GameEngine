@@ -8,7 +8,13 @@
 namespace prev {
 
 	enum class DataType {
-		None, Int, Int2, Int3, Int4, Float, Float2,	Float3,	Float4,	Bool
+		None,
+		Int, Int2, Int3, Int4,
+		UInt, UInt2, UInt3, UInt4,
+		Float, Float2,	Float3,	Float4,
+		UByte, UByte2, /*UByte3,*/ UByte4,	//3 Component byte not available in DirectX11. Moreover it cause alignement problem
+		Byte, Byte2, /*Byte3,*/ Byte4,		//----------------------------------------''---------------------------------------
+		Bool,
 	};
 
 	pvuint GetSizeBytes(DataType type);

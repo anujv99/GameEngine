@@ -117,8 +117,12 @@ namespace prev {
 #ifdef ENGINE_PROFILE
 	#define PV_PROFILE_BEGIN_SESSION(name, filepath) ::prev::Instrumentor::Get().BeginSession(name, filepath)
 	#define PV_PROFILE_END_SESSION() ::prev::Instrumentor::Get().EndSession()
-	#define PV_PROFILE_SCOPE(name) ::prev::InstrumentationTimer timer##__LINE__(name);
-	#define PV_PROFILE_FUNCTION() PV_PROFILE_SCOPE(__FUNCSIG__)
+#define PV_PROFILE_SCOPE(name) ::prev::InstrumentationTimer _timer(name);
+	#if defined(ENGINE_WINDOWS)
+		#define PV_PROFILE_FUNCTION() PV_PROFILE_SCOPE(__FUNCSIG__)
+	#elif defined(ENGINE_LINUX)
+		#define PV_PROFILE_FUNCTION() PV_PROFILE_SCOPE(__PRETTY_FUNCTION__)
+	#endif
 #else
 	#define PV_PROFILE_BEGIN_SESSION(name, filepath)
 	#define PV_PROFILE_END_SESSION()

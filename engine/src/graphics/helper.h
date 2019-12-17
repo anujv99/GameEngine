@@ -28,17 +28,17 @@
 	switch (GraphicsContext::Ref().GetAPI()) {\
 		case GraphicsAPI::API_OPENGL:\
 		{\
-			IFNOT_OPENGL(ASSERT(false, "Failed to create " #X ". Inavlid GraphicsAPI"));\
+			IFNOT_OPENGL(ASSERTM(false, "Failed to create " #X ". Inavlid GraphicsAPI"));\
 			IF_OPENGL(return X::CreateOpenGL##X(__VA_ARGS__));\
 		}\
 		case GraphicsAPI::API_DIRECTX:\
 		{\
-			IFNOT_DIRECTX(ASSERT(false, "Failed to create "#X". Inavlid GraphicsAPI"));\
+			IFNOT_DIRECTX(ASSERTM(false, "Failed to create "#X". Inavlid GraphicsAPI"));\
 			IF_DIRECTX(return X::CreateDirectX##X(__VA_ARGS__));\
 		}\
 		default:\
 		{\
-			IFNOT_DIRECTX(ASSERT(false, "Failed to create "#X". Inavlid GraphicsAPI"));\
+			IFNOT_DIRECTX(ASSERTM(false, "Failed to create "#X". Inavlid GraphicsAPI"));\
 			break;\
 		}\
 		}\
@@ -62,19 +62,19 @@
 			switch (GraphicsContext::Ref().GetAPI()) {\
 			case GraphicsAPI::API_OPENGL:\
 			{\
-				IFNOT_OPENGL(ASSERT(false, "Failed to create " #X ". Inavlid GraphicsAPI"));\
+				IFNOT_OPENGL(ASSERTM(false, "Failed to create " #X ". Inavlid GraphicsAPI"));\
 				IF_OPENGL(s_Instance = X::CreateOpenGL##X());\
 				break;\
 			}\
 			case GraphicsAPI::API_DIRECTX:\
 			{\
-				IFNOT_DIRECTX(ASSERT(false, "Failed to create "#X". Inavlid GraphicsAPI"));\
+				IFNOT_DIRECTX(ASSERTM(false, "Failed to create "#X". Inavlid GraphicsAPI"));\
 				IF_DIRECTX(s_Instance = X::CreateDirectX##X());\
 				break;\
 			}\
 			default:\
 			{\
-				IFNOT_DIRECTX(ASSERT(false, "Failed to create "#X". Inavlid GraphicsAPI"));\
+				IFNOT_DIRECTX(ASSERTM(false, "Failed to create "#X". Inavlid GraphicsAPI"));\
 				break;\
 			}\
 			}\

@@ -1,5 +1,7 @@
 #include "openglrenderstate.h"
 
+#ifdef ENGINE_OPENGL
+
 namespace prev {
 
 	GLenum GetOpenGLType(PrimitiveTopology topology) {
@@ -45,3 +47,5 @@ namespace prev {
 	}
 
 }
+
+#endif

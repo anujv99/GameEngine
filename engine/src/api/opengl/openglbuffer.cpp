@@ -28,6 +28,12 @@ namespace prev {
 		glBindBuffer(GL_ARRAY_BUFFER, 0u);
 	}
 
+	void OpenGLVertexBuffer::SubData(const void * data, pvsizet size, pvsizet offset) {
+		ASSERT(data);
+		ASSERT(size);
+		glBufferSubData(GL_ARRAY_BUFFER, static_cast<GLintptr>(offset), static_cast<GLsizeiptr>(size), data);
+	}
+
 	void OpenGLVertexBuffer::SetBufferLayout(StrongHandle<BufferLayout> layout) {
 		if (layout == nullptr) {
 			LOG_ERROR("Inavlid buffer layout");

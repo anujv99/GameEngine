@@ -14,6 +14,8 @@ namespace prev {
 		virtual ~Application();
 	public:
 		void Run();
+	
+		inline LayerStack & GetLayerStack() { return m_LayerStack; }
 	private:
 		void OnEvent(Event & e);
 		bool OnWindowClose(WindowCloseEvent & e);
