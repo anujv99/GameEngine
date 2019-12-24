@@ -9,14 +9,15 @@
 
 namespace prev {
 
+	extern ComPtr<ID3D11Device> s_Device;
+	extern ComPtr<ID3D11DeviceContext> s_DeviceContext;
+
 	inline static ComPtr<ID3D11Device> GetDevice() {
-		DirectXContext * con = dynamic_cast<DirectXContext *>(GraphicsContext::Get());
-		return con->GetDevice();
+		return s_Device;
 	}
 
 	inline static ComPtr<ID3D11DeviceContext> GetDeviceContext() {
-		DirectXContext * con = dynamic_cast<DirectXContext *>(GraphicsContext::Get());
-		return con->GetDeviceContext();
+		return s_DeviceContext;
 	}
 
 }

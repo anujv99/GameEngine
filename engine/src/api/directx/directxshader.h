@@ -20,6 +20,7 @@ namespace prev {
 		void Bind();
 
 		inline ComPtr<ID3DBlob> GetShaderBytecode() { return m_ShaderBytecode; }
+		inline ComPtr<ID3D11VertexShader> GetNativeShader() { return m_VertexShader; }
 	private:
 		ComPtr<ID3D11VertexShader> m_VertexShader;
 		ComPtr<ID3DBlob> m_ShaderBytecode;
@@ -35,6 +36,7 @@ namespace prev {
 		void Bind();
 
 		inline ComPtr<ID3DBlob> GetShaderBytecode() { return m_ShaderBytecode; }
+		inline ComPtr<ID3D11PixelShader> GetNativeShader() { return m_PixelShader; }
 	private:
 		ComPtr<ID3D11PixelShader> m_PixelShader;
 		ComPtr<ID3DBlob> m_ShaderBytecode;
@@ -50,8 +52,8 @@ namespace prev {
 		virtual void Bind() override;
 		virtual void UnBind() override {};
 	private:
-		StrongHandle<DirectXVertexShader> m_VS;
-		StrongHandle<DirectXPixelShader> m_PS;
+		ComPtr<ID3D11VertexShader> m_VS;
+		ComPtr<ID3D11PixelShader> m_PS;
 	};
 
 }

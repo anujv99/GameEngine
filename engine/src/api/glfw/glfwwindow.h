@@ -17,6 +17,10 @@ namespace prev {
 		virtual void SetEventFunction(EventFunc eventFunc) override;
 
 		virtual pvptr GetRawWindowPtr() override { return reinterpret_cast<pvptr>(m_WindowProps.Window); }
+
+		virtual pvuint GetWidth() const override { return m_WindowProps.Width; };
+		virtual pvuint GetHeight() const override { return m_WindowProps.Height; };
+		virtual pvstring GetTitle() const override { return m_WindowProps.Title; };
 	private:
 		void SetCallbacks();
 	public:

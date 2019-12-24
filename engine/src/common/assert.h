@@ -3,7 +3,7 @@
 #include <cassert>
 #include <csignal>
 
-#include "logger.h"
+#include "../core/logger.h"
 
 #if defined(_MSC_VER)
 	#define DEBUG_BREAK() __debugbreak()

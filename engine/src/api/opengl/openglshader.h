@@ -17,7 +17,7 @@ namespace prev {
 		OpenGLVertexShader(const pvstring & source);
 		~OpenGLVertexShader();
 
-		inline GLuint GetID() const { return m_ID; }
+		inline GLuint GetID() const { PV_PROFILE_FUNCTION(); return m_ID; }
 	private:
 		GLuint m_ID;
 	};
@@ -29,7 +29,7 @@ namespace prev {
 		OpenGLFragmentShader(const pvstring & source);
 		~OpenGLFragmentShader();
 
-		inline GLuint GetID() const { return m_ID; }
+		inline GLuint GetID() const { PV_PROFILE_FUNCTION(); return m_ID; }
 	private:
 		GLuint m_ID;
 	};
@@ -43,7 +43,7 @@ namespace prev {
 
 		inline GLuint GetID() const { return m_ID; }
 
-		virtual void Bind() override { glUseProgram(m_ID); };
+		virtual void Bind() override { PV_PROFILE_FUNCTION(); glUseProgram(m_ID); };
 		virtual void UnBind() override { glUseProgram(0u); };
 	private:
 		GLuint m_ID;

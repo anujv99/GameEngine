@@ -4,3 +4,6 @@
 [submodule "engine/vendor/prevmath"]
 	path = engine/vendor/prevmath
 	url = https://github.com/preversewharf45/PrevMath
+[submodule "engine/vendor/lua"]
+	path = engine/vendor/lua
+	url = https://github.com/preversewharf45/lua

@@ -2,7 +2,7 @@
 
 #ifdef ENGINE_LOGGING
 
-	#include "logger.h"
+	#include "../core/logger.h"
 
 	#define LOG_CHANGE_COLOR_RED()		prev::Logger::ChangeColor(prev::LoggerColor::COLOR_RED)
 	#define LOG_CHANGE_COLOR_GREEN()	prev::Logger::ChangeColor(prev::LoggerColor::COLOR_GREEN)

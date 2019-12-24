@@ -14,6 +14,7 @@ namespace prev {
 	}
 
 	DirectXVertexShader::DirectXVertexShader(const pvstring & source) {
+		PV_PROFILE_FUNCTION();
 		UINT flags = 0;
 		#ifdef ENGINE_DEBUG
 		flags |= D3DCOMPILE_DEBUG;
@@ -58,7 +59,8 @@ namespace prev {
 	DirectXVertexShader::~DirectXVertexShader() {}
 
 	void DirectXVertexShader::Bind() {
-		GetDeviceContext()->VSSetShader(m_VertexShader.Get(), nullptr, 0);
+		PV_PROFILE_FUNCTION();
+		GetDeviceContext()->VSSetShader(m_VertexShader.Get(), nullptr, 0u);
 	}
 
 	// ------------- FRAGMENT SHADER -------------
@@ -68,6 +70,7 @@ namespace prev {
 	}
 
 	DirectXPixelShader::DirectXPixelShader(const pvstring & source) {
+		PV_PROFILE_FUNCTION();
 		UINT flags = 0;
 		#ifdef ENGINE_DEBUG
 		flags |= D3DCOMPILE_DEBUG;
@@ -112,7 +115,8 @@ namespace prev {
 	DirectXPixelShader::~DirectXPixelShader() {}
 
 	void DirectXPixelShader::Bind() {
-		GetDeviceContext()->PSSetShader(m_PixelShader.Get(), nullptr, 0);
+		PV_PROFILE_FUNCTION();
+		GetDeviceContext()->PSSetShader(m_PixelShader.Get(), nullptr, 0u);
 	}
 
 	// ------------- SHADER PROGRAM -------------
@@ -122,15 +126,17 @@ namespace prev {
 	}
 
 	DirectXShaderProgram::DirectXShaderProgram(StrongHandle<VertexShader> vShader, StrongHandle<FragmentShader> fShader) : 
-		m_VS(dynamic_cast<DirectXVertexShader *>(vShader.Get())), m_PS(dynamic_cast<DirectXPixelShader *>(fShader.Get())) {
+		m_VS(dynamic_cast<DirectXVertexShader *>(vShader.Get())->GetNativeShader()), 
+		m_PS(dynamic_cast<DirectXPixelShader *>(fShader.Get())->GetNativeShader()) {
 		LOG_INFO("[DirectX] Shader Program successfully created");
 	}
 
 	DirectXShaderProgram::~DirectXShaderProgram() {}
 
 	void prev::DirectXShaderProgram::Bind() {
-		m_VS->Bind();
-		m_PS->Bind();
+		PV_PROFILE_FUNCTION();
+		GetDeviceContext()->VSSetShader(m_VS.Get(), nullptr, 0u);
+		GetDeviceContext()->PSSetShader(m_PS.Get(), nullptr, 0u);
 	}
 
 }

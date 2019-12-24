@@ -6,6 +6,8 @@
 
 namespace prev {
 	
+	extern pvuint NUMBER_OF_DRAW_CALLS;
+
 	GLenum GetOpenGLType(DataType dataType) {
 		switch (dataType) {
 		case prev::DataType::Int:		return GL_INT;
@@ -38,6 +40,7 @@ namespace prev {
 	}
 
 	OpenGLVertexArray::OpenGLVertexArray() : m_ID(0u), m_VBOIndex(0u), m_VertexBuffers() {
+		PV_PROFILE_FUNCTION();
 		glCreateVertexArrays(1, &m_ID);
 	}
 
@@ -55,6 +58,7 @@ namespace prev {
 	}
 
 	void OpenGLVertexArray::AddVertexBuffer(const StrongHandle<VertexBuffer> vertexBuffer) {
+		PV_PROFILE_FUNCTION();
 		ASSERTM(vertexBuffer->GetLayout() != nullptr && vertexBuffer->GetLayout()->GetNumEntries() > 0, "Vertex Buffer has inavlid layout");
 
 		Bind();
@@ -78,7 +82,9 @@ namespace prev {
 	}
 
 	void OpenGLVertexArray::Draw(pvuint numElements) {
+		PV_PROFILE_FUNCTION();
 		glDrawArrays(dynamic_cast<OpenGLRenderState *>(OpenGLRenderState::Get())->GetOpenGLTopology(), 0, numElements);
+		NUMBER_OF_DRAW_CALLS++;
 	}
 
 }

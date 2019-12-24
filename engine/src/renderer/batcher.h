@@ -32,7 +32,7 @@ namespace prev {
 
 	struct Vertex {
 		Vertex() : Position(0.0f), Color() {}
-		Vertex(Vec2 pos, VertexColor col) : Position(pos), Color(col) {}
+		Vertex(const Vec2 & pos, VertexColor col) : Position(pos), Color(col) {}
 
 		inline void Reset(const Vec2 & pos, const VertexColor & color) { Position = pos; Color = color; }
 
@@ -54,7 +54,7 @@ namespace prev {
 		void PolygonBegin(PrimitiveTopology topology);
 		void PolygonEnd();
 
-		void Vertex(Vec2 pos);
+		void Vertex(const Vec2 & pos);
 	protected:
 		struct Batch : HandledObject<Batch> {
 			friend class Batcher;
@@ -81,6 +81,16 @@ namespace prev {
 		pvsizet m_NumVertices;
 		VertexColor m_CurrentColor;
 		StrongHandle<Batch> m_CurrentBatch;
+	public:
+		void DrawLine(const Vec2 & start, const Vec2 & end);
+		void DrawLineThick(const Vec2 & start, const Vec2 & end, pvfloat thickness);
+		void DrawLineThickWire(const Vec2 & start, const Vec2 & end, pvfloat thickness);
+		void DrawLineDashed(const Vec2 & start, const Vec2 & end, pvfloat stepSize);
+		void DrawTriangle(const Vec2 & a, const Vec2 & b, const Vec2 & c);
+		void DrawTriangleWire(const Vec2 & a, const Vec2 & b, const Vec2 & c);
+		void DrawQuad(const Vec2 & a, const Vec2 & b, const Vec2 & c, const Vec2 & d);
+		void DrawQuadWire(const Vec2 & a, const Vec2 & b, const Vec2 & c, const Vec2 & d);
+		//To Be Continued...
 	};
 
 }

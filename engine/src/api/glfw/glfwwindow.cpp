@@ -50,7 +50,6 @@ namespace prev {
 	void GLFWWindow::Update() {
 		if (!glfwWindowShouldClose(m_WindowProps.Window)) {
 			glfwPollEvents();
-			glfwSwapBuffers(m_WindowProps.Window);
 		}
 	}
 

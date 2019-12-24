@@ -16,6 +16,10 @@ namespace prev {
 
 	IFNOT_OPENGL(GraphicsAPI GraphicsContext::s_GraphicsAPI = GraphicsAPI::API_OPENGL);
 
+	ComPtr<ID3D11Device> s_Device;
+	ComPtr<ID3D11DeviceContext> s_DeviceContext;
+
+
 	GraphicsContext * GraphicsContext::CreateDirectXContext() {
 		return dynamic_cast<GraphicsContext *>(new DirectXContext());
 	}
@@ -25,16 +29,19 @@ namespace prev {
 	DirectXContext::~DirectXContext() {}
 
 	void DirectXContext::BeginFrame() {
+		PV_PROFILE_FUNCTION();
 		float clearColor[] = { 0, 0, 0, 0 };
 		m_DeviceContext->ClearRenderTargetView(m_RenderTargetView.Get(), clearColor);
 		m_DeviceContext->ClearDepthStencilView(m_DepthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	}
 
 	void DirectXContext::EndFrame() {
+		PV_PROFILE_FUNCTION();
 		m_SwapChain->Present(1u, 0u);
 	}
 
 	void DirectXContext::CreateContext(pvptr rawWindowPtr) {
+		PV_PROFILE_FUNCTION();
 		m_WindowPtr = reinterpret_cast<::GLFWwindow *>(rawWindowPtr);
 		ASSERTM(m_WindowPtr, "Unable to create DirectX context without a valid window");
 
@@ -66,6 +73,8 @@ namespace prev {
 
 		LogInfo();
 
+		s_Device = m_Device;
+		s_DeviceContext = m_DeviceContext;
 	}
 
 	void DirectXContext::InitializeDirectX(DXGI_MODE_DESC bufferDesc) {

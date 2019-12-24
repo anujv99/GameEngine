@@ -35,6 +35,10 @@ namespace prev {
 		virtual void Update() = 0;
 		virtual void SetEventFunction(EventFunc eventFunc) = 0;
 		virtual pvptr GetRawWindowPtr() = 0;
+
+		virtual pvuint GetWidth() const = 0;
+		virtual pvuint GetHeight() const = 0;
+		virtual pvstring GetTitle() const = 0;
 	private:
 		static Window * CreateWindow();
 	};

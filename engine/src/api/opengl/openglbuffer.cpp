@@ -10,6 +10,7 @@ namespace prev {
 
 	OpenGLVertexBuffer::OpenGLVertexBuffer(const void * data, pvsizet size, pvuint stride, BufferUsage usage) : 
 		m_ID(0u), m_StrideBytes(stride), m_Layout(nullptr) {
+		PV_PROFILE_FUNCTION();
 		ASSERT(size > 0);
 		glCreateBuffers(1, &m_ID);
 		glBindBuffer(GL_ARRAY_BUFFER, m_ID);
@@ -21,6 +22,7 @@ namespace prev {
 	}
 
 	void OpenGLVertexBuffer::Bind() const  {
+		PV_PROFILE_FUNCTION();
 		glBindBuffer(GL_ARRAY_BUFFER, m_ID);
 	}
 
@@ -29,6 +31,7 @@ namespace prev {
 	}
 
 	void OpenGLVertexBuffer::SubData(const void * data, pvsizet size, pvsizet offset) {
+		PV_PROFILE_FUNCTION();
 		ASSERT(data);
 		ASSERT(size);
 		glBufferSubData(GL_ARRAY_BUFFER, static_cast<GLintptr>(offset), static_cast<GLsizeiptr>(size), data);

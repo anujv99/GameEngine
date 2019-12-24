@@ -1,16 +1,18 @@
 
 add_subdirectory(vendor/glfw)
 add_subdirectory(vendor/glad)
+add_subdirectory(vendor/lua)
 
 file(GLOB_RECURSE engine_source_files "src/*.*")
 
 add_library(Engine STATIC ${engine_source_files})
 
 target_precompile_headers(Engine PRIVATE "src/enginepch.h")
-target_include_directories(Engine PRIVATE "src" "vendor/glfw/include" "vendor/glad/include" "vendor/prevmath/include")
+target_include_directories(Engine PRIVATE "src" "vendor/glfw/include" "vendor/glad/include" "vendor/prevmath/include" "vendor/lua")
 
 target_link_libraries(Engine PRIVATE glfw)
 target_link_libraries(Engine PRIVATE GLAD)
+target_link_libraries(Engine PRIVATE Lua)
 
 option(ENGINE_LOGGING "enable/disable logging" TRUE)
 option(ENGINE_ASSERT "enable/disable assertions" TRUE)

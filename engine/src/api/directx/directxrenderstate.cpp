@@ -29,11 +29,14 @@ namespace prev {
 	DirectXRenderState::DirectXRenderState() : m_Prim(), m_Viewport() {}
 
 	void DirectXRenderState::SetTopology(PrimitiveTopology topology) {
+		PV_PROFILE_FUNCTION();
+		if (m_Prim == topology) return;
 		GetDeviceContext()->IASetPrimitiveTopology(GetDirectXType(topology));
 		m_Prim = topology;
 	}
 
 	void DirectXRenderState::SetViewport(Viewport viewport) {
+		PV_PROFILE_FUNCTION();
 		D3D11_VIEWPORT vp;
 		vp.TopLeftX		= viewport.TopLeftX;
 		vp.TopLeftY		= viewport.TopLeftY;

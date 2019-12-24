@@ -46,6 +46,7 @@ namespace prev {
 	}
 
 	OpenGLVertexShader::OpenGLVertexShader(const pvstring & source) : m_ID(0u) {
+		PV_PROFILE_FUNCTION();
 		m_ID = CreateAndCompileShader(GL_VERTEX_SHADER, source);
 		LOG_INFO("[OpenGL] Vertex shader successfully created");
 	}
@@ -61,6 +62,7 @@ namespace prev {
 	}
 
 	OpenGLFragmentShader::OpenGLFragmentShader(const pvstring & source) {
+		PV_PROFILE_FUNCTION();
 		m_ID = CreateAndCompileShader(GL_FRAGMENT_SHADER, source);
 		LOG_INFO("[OpenGL] Fragment shader successfully created");
 	}
@@ -77,6 +79,7 @@ namespace prev {
 
 	OpenGLShaderProgram::OpenGLShaderProgram(StrongHandle<VertexShader> vShader, StrongHandle<FragmentShader> fShader) : 
 		m_ID(0u), m_VS(nullptr), m_FS(nullptr) {
+		PV_PROFILE_FUNCTION();
 		ASSERT(vShader != nullptr);
 		ASSERT(fShader != nullptr);
 

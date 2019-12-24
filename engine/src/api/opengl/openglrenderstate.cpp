@@ -29,11 +29,13 @@ namespace prev {
 	OpenGLRenderState::OpenGLRenderState() : m_Prim(), m_Viewport(), m_OpenGLPrim(GL_INVALID_ENUM) {}
 
 	void OpenGLRenderState::SetTopology(PrimitiveTopology topology) {
+		PV_PROFILE_FUNCTION();
 		m_OpenGLPrim = GetOpenGLType(topology);
 		m_Prim = topology;
 	}
 
 	void OpenGLRenderState::SetViewport(Viewport viewport) {
+		PV_PROFILE_FUNCTION();
 		glViewport(viewport.TopLeftX, viewport.TopLeftY, viewport.Width, viewport.Height);
 		m_Viewport = viewport;
 	}

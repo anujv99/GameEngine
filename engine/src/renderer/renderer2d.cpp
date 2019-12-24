@@ -81,13 +81,15 @@ namespace prev {
 
 		m_VertexArray = VertexArray::Create(vShader);
 		m_VertexArray->AddVertexBuffer(m_BatcherBuffer);
+
+		m_VertexArray->Bind();
+		m_Shader->Bind();
 	}
 
 	Renderer2D::~Renderer2D() {}
 
 	void Renderer2D::Render() {
 		PV_PROFILE_FUNCTION();
-
 		FlushAll();
 	}
 
@@ -97,8 +99,6 @@ namespace prev {
 		RenderState::Ref().SetTopology(prim);
 		m_BatcherBuffer->SubData(batch->GetData(), batch->GetDataSize(), 0);
 
-		m_VertexArray->Bind();
-		m_Shader->Bind();
 		m_VertexArray->Draw(batch->GetNumElements());
 	}
 

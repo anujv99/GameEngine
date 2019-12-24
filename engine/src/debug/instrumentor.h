@@ -3,17 +3,21 @@
 // https://github.com/TheCherno/Hazel/blob/master/Hazel/src/Hazel/Debug/Instrumentor.h
 
 #include <string>
-#include <chrono>
 #include <algorithm>
 #include <fstream>
 #include <thread>
+#include <stack>
+#include <list>
+
+#include "../common/types.h"
+#include "../core/timer.h"
 
 namespace prev {
 
 	struct ProfileResult {
-		std::string Name;
-		long long Start, End;
-		uint32_t ThreadID;
+		const char * Name;
+		pvint64 Start, End;
+		pvuint ThreadID;
 	};
 
 	struct InstrumentationSession {
@@ -28,7 +32,6 @@ namespace prev {
 	public:
 		Instrumentor()
 			: m_CurrentSession(nullptr), m_ProfileCount(0) {
-
 		}
 
 		void BeginSession(const std::string & name, const std::string & filepath = "results.json") {
@@ -85,39 +88,56 @@ namespace prev {
 	public:
 		InstrumentationTimer(const char * name)
 			: m_Name(name), m_Stopped(false) {
-			m_StartTimepoint = std::chrono::high_resolution_clock::now();
+
+			m_StartTimepoint = static_cast<pvint64>(Timer::GetTime().GetNS());
+			if (!s_ParentsTimes.empty()) {
+				if (m_StartTimepoint == s_ParentsTimes.top()) {
+					m_StartTimepoint += 1;
+				}
+			}
+			s_ParentsTimes.push(m_StartTimepoint);
 		}
 
 		~InstrumentationTimer() {
 			if (!m_Stopped)
 				Stop();
+			s_ParentsTimes.pop();
+			if (s_ParentsTimes.empty()) {
+				for (pvuint i = 0; i < s_ArrayIndex; i++) {
+					Instrumentor::Get().WriteProfile(s_Results[i]);
+				}
+				s_ArrayIndex = 0u;
+			}
 		}
 
 		void Stop() {
-			auto endTimepoint = std::chrono::high_resolution_clock::now();
-
-			long long start = std::chrono::time_point_cast<std::chrono::microseconds>(m_StartTimepoint).time_since_epoch().count();
-			long long end = std::chrono::time_point_cast<std::chrono::microseconds>(endTimepoint).time_since_epoch().count();
-
+			auto endTimepoint = static_cast<pvint64>(Timer::GetTime().GetNS());
 			uint32_t threadID = std::hash<std::thread::id>{}(std::this_thread::get_id());
-			Instrumentor::Get().WriteProfile({ m_Name, start, end, threadID });
-
+			s_Results[s_ArrayIndex].Name = m_Name;
+			s_Results[s_ArrayIndex].Start = m_StartTimepoint;
+			s_Results[s_ArrayIndex].End = endTimepoint;
+			s_Results[s_ArrayIndex].ThreadID = threadID;
+			s_ArrayIndex++;
 			m_Stopped = true;
 		}
 	private:
+		static std::stack<pvint64> s_ParentsTimes;
+		static ProfileResult s_Results[512];
+		static pvuint s_ArrayIndex;
+
 		const char * m_Name;
-		std::chrono::time_point<std::chrono::high_resolution_clock> m_StartTimepoint;
+		pvint64 m_StartTimepoint;
 		bool m_Stopped;
 	};
 
 }
 
-#define ENGINE_PROFILE 
+#define ENGINE_PROFILE
 
 #ifdef ENGINE_PROFILE
 	#define PV_PROFILE_BEGIN_SESSION(name, filepath) ::prev::Instrumentor::Get().BeginSession(name, filepath)
 	#define PV_PROFILE_END_SESSION() ::prev::Instrumentor::Get().EndSession()
-#define PV_PROFILE_SCOPE(name) ::prev::InstrumentationTimer _timer(name);
+#define PV_PROFILE_SCOPE(name) ::prev::InstrumentationTimer timer##__LINE__(name);
 	#if defined(ENGINE_WINDOWS)
 		#define PV_PROFILE_FUNCTION() PV_PROFILE_SCOPE(__FUNCSIG__)
 	#elif defined(ENGINE_LINUX)

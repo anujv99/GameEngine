@@ -22,4 +22,6 @@
 #include "common/assert.h"
 #include "common/singleton.h"
 
+#include "core/timer.h"
+
 #include "debug/instrumentor.h"

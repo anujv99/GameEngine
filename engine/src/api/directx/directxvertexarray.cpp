@@ -4,6 +4,8 @@
 
 namespace prev {
 
+	extern pvuint NUMBER_OF_DRAW_CALLS;
+
 	DXGI_FORMAT GetDirectXType(DataType dataType, pvbool normalize) {
 		if (normalize) {
 			switch (dataType) {
@@ -64,6 +66,7 @@ namespace prev {
 	DirectXVertexArray::~DirectXVertexArray() {}
 
 	void DirectXVertexArray::Bind() {
+		PV_PROFILE_FUNCTION();
 		if (m_InputLayout == nullptr) {
 			DirectXVertexShader * vShader = dynamic_cast<DirectXVertexShader *>(m_VertexShader.Get());
 			ComPtr<ID3DBlob> shaderBytecode = vShader->GetShaderBytecode();
@@ -92,6 +95,7 @@ namespace prev {
 	void DirectXVertexArray::UnBind() {}
 
 	void DirectXVertexArray::AddVertexBuffer(const StrongHandle<VertexBuffer> vertexBuffer) {
+		PV_PROFILE_FUNCTION();
 		ASSERTM(vertexBuffer->GetLayout() != nullptr && vertexBuffer->GetLayout()->GetNumEntries() > 0, "Vertex Buffer has inavlid layout");
 
 		const StrongHandle<BufferLayout> & layout = vertexBuffer->GetLayout();
@@ -113,7 +117,9 @@ namespace prev {
 	}
 
 	void DirectXVertexArray::Draw(pvuint numElements) {
+		PV_PROFILE_FUNCTION();
 		GetDeviceContext()->Draw(numElements, 0);
+		NUMBER_OF_DRAW_CALLS++;
 	}
 
 }
