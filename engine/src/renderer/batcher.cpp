@@ -138,4 +138,295 @@ namespace prev {
 		PolygonEnd();
 	}
 
+	void Batcher::DrawRect(const Vec2 & pos, const Vec2 & dimen) {
+		Vec2 halfDimen = dimen / 2.0f;
+		DrawQuad(
+			pos + Vec2(-halfDimen.x,  halfDimen.y),
+			pos + Vec2( halfDimen.x,  halfDimen.y),
+			pos + Vec2( halfDimen.x, -halfDimen.y),
+			pos + Vec2(-halfDimen.x, -halfDimen.y));
+	}
+
+	void Batcher::DrawRectWire(const Vec2 & pos, const Vec2 & dimen) {
+		Vec2 halfDimen = dimen / 2.0f;
+		DrawQuadWire(
+			pos + Vec2(-halfDimen.x, halfDimen.y),
+			pos + Vec2(halfDimen.x, halfDimen.y),
+			pos + Vec2(halfDimen.x, -halfDimen.y),
+			pos + Vec2(-halfDimen.x, -halfDimen.y));
+	}
+
+	void prev::Batcher::DrawRectRounded(const Vec2 & pos, const Vec2 & dimen, pvfloat cornerRadius) {
+		PolygonBegin(PrimitiveTopology::TOPOLOGY_TRIANGLE);
+		const Vec2 centerPos = pos;
+		const Vec2 bottomLeft = pos - dimen / 2.0f;
+		Vec2 firstPos;
+		pvfloat angle = 180;
+		std::vector<Vec2> positions;
+
+		Vec2 startPositions[4] = {
+			bottomLeft + Vec2(cornerRadius),
+			bottomLeft + Vec2(dimen.x - cornerRadius, cornerRadius),
+			bottomLeft + dimen - Vec2(cornerRadius),
+			bottomLeft + Vec2(cornerRadius, dimen.y - cornerRadius)
+		};
+
+		for (pvuint j = 0; j < 4u; j++) {
+			positions = DrawRoundRectHelper(angle, cornerRadius, startPositions[j]);
+			if (j == 0)
+				firstPos = positions[0];
+			else
+				Vertex(positions[0]);
+			for (size_t i = 0; i < positions.size() - 1; i++) {
+				Vertex(centerPos);
+				Vertex(positions[i]);
+				Vertex(positions[i + 1]);
+			}
+
+			Vertex(centerPos);
+			Vertex(positions[positions.size() - 1]);
+
+			angle += 90.0f;
+		}
+
+		Vertex(firstPos);
+
+		PolygonEnd();
+	}
+
+	void Batcher::DrawRectRoundedWire(const Vec2 pos, const Vec2 dimen, float cornerRadius) {
+		PolygonBegin(PrimitiveTopology::TOPOLOGY_LINE);
+		const Vec2 centerPos = pos;
+		const Vec2 bottomLeft = pos - dimen / 2.0f;
+		Vec2 firstPos;
+		pvfloat angle = 180.0f;
+		std::vector<Vec2> positions;
+
+		Vec2 startPositions[4] = {
+			bottomLeft + Vec2(cornerRadius),
+			bottomLeft + Vec2(dimen.x - cornerRadius, cornerRadius),
+			bottomLeft + dimen - Vec2(cornerRadius),
+			bottomLeft + Vec2(cornerRadius, dimen.y - cornerRadius)
+		};
+
+		for (pvuint j = 0; j < 4; j++) {
+			positions = DrawRoundRectHelper(angle, cornerRadius, startPositions[j]);
+			if (j == 0)
+				firstPos = positions[0];
+			else
+				Vertex(positions[0]);
+			for (size_t i = 0; i < positions.size() - 1; i++) {
+				Vertex(positions[i]);
+				Vertex(positions[i + 1]);
+			}
+
+			Vertex(positions[positions.size() - 1]);
+
+			angle += 90.0f;
+		}
+
+		Vertex(firstPos);
+
+		PolygonEnd();
+	}
+
+	void Batcher::DrawRectRoundedTop(const Vec2 pos, const Vec2 dimen, float cornerRadius) {
+		PolygonBegin(PrimitiveTopology::TOPOLOGY_TRIANGLE);
+		const Vec2 centerPos = pos;
+		const Vec2 bottomLeft = pos - dimen / 2.0f;
+		Vec2 firstPos;
+		pvfloat angle = 0;
+		std::vector<Vec2> positions;
+
+		Vec2 startPositions[2] = {
+			bottomLeft + dimen - Vec2(cornerRadius),
+			bottomLeft + Vec2(cornerRadius, dimen.y - cornerRadius)
+		};
+
+		for (pvuint j = 0; j < 2; j++) {
+			positions = DrawRoundRectHelper(angle, cornerRadius, startPositions[j]);
+			if (j == 0)
+				firstPos = positions[0];
+			else
+				Vertex(positions[0]);
+			for (size_t i = 0; i < positions.size() - 1; i++) {
+				Vertex(centerPos);
+				Vertex(positions[i]);
+				Vertex(positions[i + 1]);
+			}
+
+			if (j != 1) {
+				Vertex(centerPos);
+				Vertex(positions[positions.size() - 1]);
+			}
+
+			angle += 90.0f;
+		}
+
+		Vertex(positions[positions.size() - 1]);
+		Vertex(bottomLeft);
+		Vertex(centerPos);
+
+		Vertex(bottomLeft);
+		Vertex(centerPos);
+		Vertex(bottomLeft + Vec2(dimen.x, 0.0f));
+
+		Vertex(bottomLeft + Vec2(dimen.x, 0.0f));
+		Vertex(centerPos);
+		Vertex(firstPos);
+
+		PolygonEnd();
+	}
+
+	void Batcher::DrawRectRoundedTopWire(const Vec2 pos, const Vec2 dimen, float cornerRadius) {
+		PolygonBegin(PrimitiveTopology::TOPOLOGY_LINE);
+		const Vec2 centerPos = pos;
+		const Vec2 bottomLeft = pos - dimen / 2.0f;
+		Vec2 firstPos;
+		float angle = 0;
+		std::vector<Vec2> positions;
+
+		Vec2 startPositions[2] = {
+			bottomLeft + dimen - Vec2(cornerRadius),
+			bottomLeft + Vec2(cornerRadius, dimen.y - cornerRadius)
+		};
+
+		for (unsigned int j = 0; j < 2; j++) {
+			positions = DrawRoundRectHelper(angle, cornerRadius, startPositions[j]);
+			if (j == 0)
+				firstPos = positions[0];
+			else
+				Vertex(positions[0]);
+			for (size_t i = 0; i < positions.size() - 1; i++) {
+				Vertex(positions[i]);
+				Vertex(positions[i + 1]);
+			}
+
+			if (j != 1) {
+				Vertex(positions[positions.size() - 1]);
+			}
+
+			angle += 90.0f;
+		}
+
+		Vertex(positions[positions.size() - 1]);
+		Vertex(bottomLeft);
+
+		Vertex(bottomLeft);
+		Vertex(bottomLeft + Vec2(dimen.x, 0.0f));
+
+		Vertex(bottomLeft + Vec2(dimen.x, 0.0f));
+		Vertex(firstPos);
+
+		PolygonEnd();
+	}
+
+	void Batcher::DrawRectRoundedBottom(const Vec2 pos, const Vec2 dimen, float cornerRadius) {
+		PolygonBegin(PrimitiveTopology::TOPOLOGY_TRIANGLE);
+		const Vec2 centerPos = pos;
+		const Vec2 bottomLeft = pos - dimen / 2.0f;
+		Vec2 firstPos;
+		float angle = 180.0f;
+		std::vector<Vec2> positions;
+
+		Vec2 startPositions[2] = {
+			bottomLeft + Vec2(cornerRadius),
+			bottomLeft + Vec2(dimen.x - cornerRadius, cornerRadius),
+		};
+
+		for (unsigned int j = 0; j < 2; j++) {
+			positions = DrawRoundRectHelper(angle, cornerRadius, startPositions[j]);
+			if (j == 0)
+				firstPos = positions[0];
+			else
+				Vertex(positions[0]);
+			for (size_t i = 0; i < positions.size() - 1; i++) {
+				Vertex(centerPos);
+				Vertex(positions[i]);
+				Vertex(positions[i + 1]);
+			}
+
+			if (j != 1) {
+				Vertex(centerPos);
+				Vertex(positions[positions.size() - 1]);
+			}
+
+			angle += 90.0f;
+		}
+
+		Vertex(positions[positions.size() - 1]);
+		Vertex(bottomLeft + dimen);
+		Vertex(centerPos);
+
+		Vertex(bottomLeft + dimen);
+		Vertex(centerPos);
+		Vertex(bottomLeft + Vec2(0.0f, dimen.y));
+
+		Vertex(bottomLeft + Vec2(0.0f, dimen.y));
+		Vertex(centerPos);
+		Vertex(firstPos);
+
+		PolygonEnd();
+	}
+
+	void Batcher::DrawRectRoundedBottomWire(const Vec2 pos, const Vec2 dimen, float cornerRadius) {
+		PolygonBegin(PrimitiveTopology::TOPOLOGY_LINE);
+		const Vec2 centerPos = pos;
+		const Vec2 bottomLeft = pos - dimen / 2.0f;
+		Vec2 firstPos;
+		float angle = 180.0f;
+		std::vector<Vec2> positions;
+
+		Vec2 startPositions[2] = {
+			bottomLeft + Vec2(cornerRadius),
+			bottomLeft + Vec2(dimen.x - cornerRadius, cornerRadius),
+		};
+
+		for (unsigned int j = 0; j < 2; j++) {
+			positions = DrawRoundRectHelper(angle, cornerRadius, startPositions[j]);
+			if (j == 0)
+				firstPos = positions[0];
+			else
+				Vertex(positions[0]);
+			for (size_t i = 0; i < positions.size() - 1; i++) {
+				Vertex(positions[i]);
+				Vertex(positions[i + 1]);
+			}
+
+			if (j != 1) {
+				Vertex(positions[positions.size() - 1]);
+			}
+
+			angle += 90.0f;
+		}
+
+		Vertex(positions[positions.size() - 1]);
+		Vertex(bottomLeft + dimen);
+
+		Vertex(bottomLeft + dimen);
+		Vertex(bottomLeft + Vec2(0.0f, dimen.y));
+
+		Vertex(bottomLeft + Vec2(0.0f, dimen.y));
+		Vertex(firstPos);
+
+		PolygonEnd();
+	}
+
+	std::vector<Vec2> Batcher::DrawRoundRectHelper(float startAngle, float radius, Vec2 startPos) {
+		const pvuint numRoundedVerts = 8;
+		const pvfloat roundedCornerAngle = 90.0f;
+		const pvfloat roundedCircledelta_angle = roundedCornerAngle / (numRoundedVerts - 1);
+
+		std::vector<Vec2> positions;
+
+		for (pvuint i = 0; i < numRoundedVerts; ++i) {
+			float angleRad = startAngle + i * roundedCircledelta_angle;
+			Vec2 unitCircle = Vec2::UnitCircle(angleRad);
+			Vec2 pos = startPos + unitCircle * radius;
+			positions.push_back(pos);
+		}
+
+		return positions;
+	}
+
 }

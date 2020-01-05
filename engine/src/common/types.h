@@ -1,7 +1,8 @@
 #pragma once
 
 #include <cstdint>
-#include <string>
+
+#include "../utils/prevstring.h"
 
 #define _S(S) #S
 
@@ -22,7 +23,7 @@ namespace prev {
 
 	typedef bool pvbool;
 
-	typedef std::string pvstring;
+	typedef PrevString pvstring;
 
 	typedef uintptr_t pvptr;
 }

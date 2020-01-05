@@ -51,9 +51,14 @@ namespace prev {
 
 		virtual void Bind() override;
 		virtual void UnBind() override {};
+		virtual pvint GetUniformLocation(const pvstring & name, ShaderType type) override;
+	private:
+		void GetShaderReflection(ComPtr<ID3DBlob> vsBytecode, ComPtr<ID3DBlob> psBytecode);
 	private:
 		ComPtr<ID3D11VertexShader> m_VS;
 		ComPtr<ID3D11PixelShader> m_PS;
+		ComPtr<ID3D11ShaderReflection> m_VSReflection;
+		ComPtr<ID3D11ShaderReflection> m_PSReflection;
 	};
 
 }

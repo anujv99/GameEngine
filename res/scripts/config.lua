@@ -2,6 +2,6 @@
 Config = {
 	Width = 1280,
 	Height = 720,
-	Title = "Lua Window",
+	Title = "Engine Window",
 	API = "DIRECTX" -- For DirectX : DIRECTX, For OpenGL : OPENGL
 }

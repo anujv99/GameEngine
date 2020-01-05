@@ -1,3 +1,4 @@
+#pragma once
 
 #include "../common/handledobject.h"
 #include "../common/types.h"

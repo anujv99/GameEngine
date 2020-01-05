@@ -6,6 +6,11 @@
 
 namespace prev {
 
+	enum class ShaderType {
+		VERTEX_SHADER,
+		FRAGMENT_SHADER,
+	};
+
 	// ------------- VERTEX SHADER -------------
 
 	class VertexShader : public HandledObject<VertexShader> {
@@ -38,6 +43,7 @@ namespace prev {
 	public:
 		virtual void Bind() = 0;
 		virtual void UnBind() = 0;
+		virtual pvint GetUniformLocation(const pvstring & name, ShaderType type) = 0;
 	public:
 		DECLARE_OBJECT(ShaderProgram, StrongHandle<VertexShader> vShader, StrongHandle<FragmentShader> fShader);
 	};

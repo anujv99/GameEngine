@@ -21,6 +21,10 @@ namespace prev {
 		virtual pvuint GetWidth() const override { return m_WindowProps.Width; };
 		virtual pvuint GetHeight() const override { return m_WindowProps.Height; };
 		virtual pvstring GetTitle() const override { return m_WindowProps.Title; };
+
+		virtual void SetWidth(pvuint width) override;
+		virtual void SetHeight(pvuint height) override;
+		virtual void SetTitle(const pvstring & title) override;
 	private:
 		void SetCallbacks();
 	public:

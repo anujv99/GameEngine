@@ -45,6 +45,7 @@ namespace prev {
 
 		virtual void Bind() override { PV_PROFILE_FUNCTION(); glUseProgram(m_ID); };
 		virtual void UnBind() override { glUseProgram(0u); };
+		virtual pvint GetUniformLocation(const pvstring & name, ShaderType type) override;
 	private:
 		GLuint m_ID;
 		StrongHandle<VertexShader> m_VS;

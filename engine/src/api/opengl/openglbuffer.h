@@ -10,6 +10,8 @@ namespace prev{
 
 	GLenum GetOpenGLType(BufferUsage usage);
 
+	// ------------- VERTEX BUFFER -------------
+
 	class OpenGLVertexBuffer : public VertexBuffer {
 	public:
 		OpenGLVertexBuffer(const void * data, pvsizet size, pvuint stride, BufferUsage usage);
@@ -24,9 +26,24 @@ namespace prev{
 	private:
 		StrongHandle<BufferLayout> m_Layout;
 		GLuint m_ID;
+		pvsizet m_Size;
 		pvuint m_StrideBytes;
 	};
 
+	// ------------- UNIFORM BUFFER -------------
+
+	class OpenGLUniformBuffer : public UniformBuffer {
+	public:
+		OpenGLUniformBuffer(const void * data, pvsizet size, BufferUsage usage);
+		~OpenGLUniformBuffer();
+	public:
+		virtual void Bind(pvuint block, ShaderType type) const override;
+		virtual void UnBind() const override;
+		virtual void SubData(const void * data, pvsizet size, pvsizet offset) override;
+	private:
+		GLuint m_ID;
+		pvsizet m_Size;
+	};
 }
 
 #endif

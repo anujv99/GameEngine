@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <functional>
+#include <sstream>
 
 namespace prev {
 

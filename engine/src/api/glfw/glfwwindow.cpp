@@ -58,6 +58,21 @@ namespace prev {
 			m_WindowProps.EventFunction = eventFunc;
 	}
 
+	void GLFWWindow::SetWidth(pvuint width) {
+		glfwSetWindowSize(m_WindowProps.Window, width, m_WindowProps.Height);
+		m_WindowProps.Width = width;
+	}
+
+	void GLFWWindow::SetHeight(pvuint height) {
+		glfwSetWindowSize(m_WindowProps.Window, m_WindowProps.Width, height);
+		m_WindowProps.Height = height;
+	}
+
+	void GLFWWindow::SetTitle(const pvstring & title) {
+		glfwSetWindowTitle(m_WindowProps.Window, title.c_str());
+		m_WindowProps.Title = title;
+	}
+
 	void GLFWWindow::SetCallbacks() {
 
 		glfwSetWindowCloseCallback(m_WindowProps.Window, [](::GLFWwindow * window) -> void {

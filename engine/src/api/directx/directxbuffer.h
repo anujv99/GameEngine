@@ -10,6 +10,8 @@ namespace prev {
 
 	D3D11_USAGE GetDirectXType(BufferUsage usage);
 
+	// ------------- VERTEX BUFFER -------------
+
 	class DirectXVertexBuffer : public VertexBuffer {
 	public:
 		DirectXVertexBuffer(const void * data, pvsizet size, pvuint stride, BufferUsage usage);
@@ -30,6 +32,22 @@ namespace prev {
 		ComPtr<ID3D11Buffer> m_Buffer;
 
 		pvuint m_StrideBytes;
+		pvsizet m_Size;
+		BufferUsage m_Usage;
+	};
+
+	// ------------- UNIFORM BUFFER -------------
+
+	class DirectXConstantBuffer : public UniformBuffer {
+	public:
+		DirectXConstantBuffer(const void * data, pvsizet size, BufferUsage usage);
+		~DirectXConstantBuffer();
+	public:
+		virtual void Bind(pvuint block, ShaderType type) const override;
+		virtual void UnBind() const override;
+		virtual void SubData(const void * data, pvsizet size, pvsizet offset) override;
+	private:
+		ComPtr<ID3D11Buffer> m_Buffer;
 		pvsizet m_Size;
 		BufferUsage m_Usage;
 	};

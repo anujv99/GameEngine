@@ -50,6 +50,8 @@ namespace prev {
 		inline void Color(pvfloat color) { m_CurrentColor = VertexColor(color); }
 		inline void Color(pvubyte r, pvubyte g, pvubyte b, pvubyte a) { m_CurrentColor = VertexColor(r, g, b, a); }
 		inline void Color(pvfloat r, pvfloat g, pvfloat b, pvfloat a) { m_CurrentColor = VertexColor(r, g, b, a); }
+		inline void Color(Vec4 col) { m_CurrentColor = VertexColor(col.x, col.y, col.z, col.w); }
+		inline void Color(Vec3 col, float alpha) { m_CurrentColor = VertexColor(col.x, col.y, col.z, alpha); }
 
 		void PolygonBegin(PrimitiveTopology topology);
 		void PolygonEnd();
@@ -90,7 +92,17 @@ namespace prev {
 		void DrawTriangleWire(const Vec2 & a, const Vec2 & b, const Vec2 & c);
 		void DrawQuad(const Vec2 & a, const Vec2 & b, const Vec2 & c, const Vec2 & d);
 		void DrawQuadWire(const Vec2 & a, const Vec2 & b, const Vec2 & c, const Vec2 & d);
+		void DrawRect(const Vec2 & pos, const Vec2 & dimen);
+		void DrawRectWire(const Vec2 & pos, const Vec2 & dimen);
+		void DrawRectRounded(const Vec2 & pos, const Vec2 & dimen, pvfloat cornerRadius);
+		void DrawRectRoundedWire(const Vec2 pos, const Vec2 dimen, float cornerRadius);
+		void DrawRectRoundedTop(const Vec2 pos, const Vec2 dimen, float cornerRadius);
+		void DrawRectRoundedTopWire(const Vec2 pos, const Vec2 dimen, float cornerRadius);
+		void DrawRectRoundedBottom(const Vec2 pos, const Vec2 dimen, float cornerRadius);
+		void DrawRectRoundedBottomWire(const Vec2 pos, const Vec2 dimen, float cornerRadius);
 		//To Be Continued...
+	private:
+		std::vector<Vec2> DrawRoundRectHelper(float startAngle, float radius, Vec2 startPos);
 	};
 
 }

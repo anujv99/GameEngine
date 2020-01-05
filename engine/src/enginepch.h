@@ -7,6 +7,9 @@
 #error "Atleast one api is required to build the engine. User either OpenGL or DirectX"
 #endif
 
+#include "memory/memoryleak.h"
+#include "memory/memory.h"
+
 #include <cstdarg>
 #include <cstdio>
 #include <cstdlib>

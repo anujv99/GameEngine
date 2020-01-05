@@ -30,7 +30,7 @@ namespace prev {
 
 	void DirectXContext::BeginFrame() {
 		PV_PROFILE_FUNCTION();
-		float clearColor[] = { 0, 0, 0, 0 };
+		float clearColor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 		m_DeviceContext->ClearRenderTargetView(m_RenderTargetView.Get(), clearColor);
 		m_DeviceContext->ClearDepthStencilView(m_DepthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	}
@@ -75,6 +75,30 @@ namespace prev {
 
 		s_Device = m_Device;
 		s_DeviceContext = m_DeviceContext;
+	}
+
+	void DirectXContext::ChangeResolution(UINT width, UINT height) {
+		ComPtr<ID3D11Resource> backBuffer;
+		HRESULT hr = m_SwapChain->GetBuffer(0u, __uuidof(ID3D11Resource), reinterpret_cast<void **>(backBuffer.GetAddressOf()));
+		ASSERTM(hr == S_OK, "[DirectX] Failed to get back buffer");
+
+		backBuffer = nullptr;
+		m_RenderTargetView = nullptr;
+
+		hr = m_SwapChain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0u);
+		ASSERTM(hr == S_OK, "[DirectX] Failed to resize buffer");
+
+		CreateRenderTargetView();
+
+		DXGI_MODE_DESC desc;
+		desc.Width = width;
+		desc.Height = height;
+
+		m_DepthStencilBuffer = nullptr;
+		m_DepthStencilView = nullptr;
+		m_DepthStencilState = nullptr;
+
+		CreateDepthBuffer(desc);
 	}
 
 	void DirectXContext::InitializeDirectX(DXGI_MODE_DESC bufferDesc) {

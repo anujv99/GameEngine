@@ -112,6 +112,14 @@ namespace prev {
 		glDeleteProgram(m_ID);
 	}
 
+	pvint OpenGLShaderProgram::GetUniformLocation(const pvstring & name, ShaderType type) {
+		pvint location = static_cast<pvint>(glGetUniformBlockIndex(m_ID, name.c_str()));
+		if (location < 0) {
+			LOG_ERROR("[OepnGL] Unable to find shader uniform : %s", name.c_str());
+		}
+		return location;
+	}
+
 }
 
 #endif

@@ -16,7 +16,7 @@ namespace prev {
 			return false;
 		}
 
-		m_File.open(path, std::ios::in | std::ios::binary);
+		m_File.open(path.c_str(), std::ios::in | std::ios::binary);
 		m_FilePath = path;
 		m_Content.clear();
 		return true;

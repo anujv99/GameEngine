@@ -6,7 +6,7 @@
 namespace prev {
 
 	static bool FileExists(const pvstring & path) {
-		std::ifstream file(path);
+		std::ifstream file(path.c_str());
 		return file.operator bool();
 	}
 

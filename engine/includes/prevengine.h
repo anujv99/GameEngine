@@ -11,6 +11,8 @@
 
 #include "../src/renderer/renderer2d.h"
 
+#include "../src/core/timer.h"
+
 //--------------- TEMP ---------------
 
 //------------------------------------

@@ -39,6 +39,10 @@ namespace prev {
 		virtual pvuint GetWidth() const = 0;
 		virtual pvuint GetHeight() const = 0;
 		virtual pvstring GetTitle() const = 0;
+
+		virtual void SetWidth(pvuint width) = 0;
+		virtual void SetHeight(pvuint height) = 0;
+		virtual void SetTitle(const pvstring & title) = 0;
 	private:
 		static Window * CreateWindow();
 	};
