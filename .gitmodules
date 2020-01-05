@@ -7,3 +7,6 @@
 [submodule "engine/vendor/lua"]
 	path = engine/vendor/lua
 	url = https://github.com/preversewharf45/lua
+[submodule "engine/vendor/freetype"]
+	path = engine/vendor/freetype
+	url = https://github.com/preversewharf45/freetype2
