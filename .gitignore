@@ -1,5 +1,0 @@
-## Custom Ignore ##
-
-.vs/*
-out/*
-CMakeSettings.json
