@@ -2,6 +2,7 @@
 
 #include "../common/types.h"
 #include "../virtualmachine/lua.hpp"
+#include "../virtualmachine/vmlogger.h"
 
 namespace prev {
 
@@ -42,3 +43,16 @@ namespace prev {
 		}\
 		lua_setmetatable(L, -2);\
 	}
+
+
+// ****************************************************************************************************** //
+
+#define LUA_CHECK_NUM_PARAMS(N) if (lua_gettop(L) != N) { prev::VMLogger::Log("Expected %d number of params but got %d", N, lua_gettop(L));\
+								return 0; }
+
+#define LUA_FLOAT_PARAM(P, V) if (lua_type(L, P) != LUA_TNUMBER) { prev::VMLogger::Log("Expected integer as parameter at index %d", P); return 0; }\
+								prev::pvfloat V = lua_tonumber(L, P)
+#define LUA_INT_PARAM(P, V) if (lua_type(L, P) != LUA_TNUMBER) { prev::VMLogger::Log("Expected integer as parameter at index %d", P); return 0; }\
+								prev::pvint V = lua_tointeger(L, P)
+#define LUA_STRING_PARAM(P, V) if (lua_type(L, P) != LUA_TSTRING) { prev::VMLogger::Log("Expected string as parameter at index %d", P); return 0; }\
+								const prev::pvchar * V = lua_tostring(L, P)

@@ -71,6 +71,7 @@ namespace prev {
 	void DirectXTexture2D::UnBind() const {}
 
 	void DirectXTexture2D::SetData(const pvubyte * pixels, pvsizet size) {
+		PV_PROFILE_FUNCTION();
 		ASSERT(pixels);
 		ASSERT(size > 0u);
 		if (size != static_cast<pvsizet>(m_BytesPerPixel) * static_cast<pvsizet>(m_Width) * static_cast<pvsizet>(m_Height)) {
@@ -86,10 +87,24 @@ namespace prev {
 
 		pvubyte * mappedData = reinterpret_cast<pvubyte *>(msr.pData);
 		
-		for (pvuint i = 0; i < m_Height; i++) {
-			memcpy(mappedData, pixels, static_cast<pvsizet>(m_Width) * static_cast<pvsizet>(m_BytesPerPixel));
-			mappedData += msr.RowPitch;
-			pixels += static_cast<pvsizet>(m_Width) * static_cast<pvsizet>(m_BytesPerPixel);
+		if (m_BytesPerPixel == 3) {
+			for (pvsizet i = 0; i < m_Height; i++) {
+				pvubyte * ptr = mappedData;
+				pvsizet index = 0;
+				for (pvsizet j = 0; j < m_Width; j++) {
+					ptr[index++] = *pixels++;
+					ptr[index++] = *pixels++;
+					ptr[index++] = *pixels++;
+					ptr[index++] = 255;
+				}
+				mappedData += msr.RowPitch;
+			}
+		} else {
+			for (pvsizet i = 0; i < m_Height; i++) {
+				memcpy(mappedData, pixels, static_cast<pvsizet>(m_Width) * static_cast<pvsizet>(m_BytesPerPixel));
+				mappedData += msr.RowPitch;
+				pixels += static_cast<pvsizet>(m_Width) * static_cast<pvsizet>(m_BytesPerPixel);
+			}
 		}
 
 		GetDeviceContext()->Unmap(textureResource.Get(), 0u);

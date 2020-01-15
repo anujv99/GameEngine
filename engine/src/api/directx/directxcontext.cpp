@@ -30,7 +30,7 @@ namespace prev {
 
 	void DirectXContext::BeginFrame() {
 		PV_PROFILE_FUNCTION();
-		float clearColor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+		float clearColor[] = { 0.8f, 0.4f, 0.2f, 0.0f };
 		m_DeviceContext->ClearRenderTargetView(m_RenderTargetView.Get(), clearColor);
 		m_DeviceContext->ClearDepthStencilView(m_DepthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	}

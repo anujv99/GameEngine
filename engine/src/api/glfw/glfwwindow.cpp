@@ -85,6 +85,8 @@ namespace prev {
 			GLFWWindow * win = reinterpret_cast<GLFWWindow *>(glfwGetWindowUserPointer(window));
 			WindowResizeEvent e(static_cast<pvint>(width), static_cast<pvint>(height));
 			win->m_WindowProps.EventFunction(e);
+			win->m_WindowProps.Width = e.GetWindowSizeX();
+			win->m_WindowProps.Height = e.GetWindowSizeY();
 		});
 
 		glfwSetWindowPosCallback(m_WindowProps.Window, [](::GLFWwindow * window, int x, int y) -> void {
@@ -100,6 +102,7 @@ namespace prev {
 			{
 				KeyPressedEvent e(static_cast<pvint>(keyCode), false);
 				win->m_WindowProps.EventFunction(e);
+
 				break;
 			}
 			case GLFW_REPEAT:

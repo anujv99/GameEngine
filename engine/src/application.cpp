@@ -13,8 +13,8 @@
 #include "graphics/texture.h"
 #include "graphics/font.h"
 
-#include "imgui/imgui.h"
-#include "imgui/imguimanager.h"
+#include "ImGui/ImGui.h"
+#include "ImGui/ImGuimanager.h"
 
 #include "renderer/renderer2d.h"
 
@@ -27,8 +27,6 @@ static prev::MemoryLeakDetector s_LeakDetector;
 namespace prev {
 	
 	pvuint NUMBER_OF_DRAW_CALLS = 0u;
-
-	StrongHandle<Font> fnt;
 
 	Application::Application() : m_IsWindowOpen(true) {
 
@@ -83,6 +81,8 @@ namespace prev {
 		func.DestAlpha			= BlendAlphaOption::BLEND_ONE;
 		func.AlphaOperation		= BlendOperation::BLEND_OP_ADD;
 		RenderState::Ref().SetBlendFunction(func);
+
+		VirtualMachine::Ref().Run("../../../../res/scripts/main.lua");
 	}
 
 	Application::~Application() {
@@ -100,11 +100,15 @@ namespace prev {
 	void Application::Run() {
 		while (m_IsWindowOpen) {
 			PV_PROFILE_FUNCTION();
+			Timer::Update();
 
 			PreUpdate();
 
+			VirtualMachine::Ref().Update();
+
 			Render();
-			GUI();
+			
+			DrawGUI();
 			
 			PostUpdate();
 
@@ -114,13 +118,17 @@ namespace prev {
 	}
 
 	void Application::PreUpdate() {
+		PV_PROFILE_FUNCTION();
 		GraphicsContext::Ref().BeginFrame();
+
+		ImGuiManager::Ref().DetectConsumeInputs();
+		ImGuiManager::Ref().PreUpdate();
 	}
 
 	void Application::Render() {
-		
+		PV_PROFILE_FUNCTION();
 		MVPStack::Ref().Projection().Push(m_Camera->GetProjectionView());
-		Renderer2D::Ref().BeginScene(m_Camera);
+		Renderer2D::Ref().BeginScene();
 
 		for (auto & layer : m_LayerStack) {
 			layer->OnUpdate(0.0f);
@@ -130,16 +138,16 @@ namespace prev {
 		MVPStack::Ref().Projection().Pop();
 	}
 
-	void Application::GUI() {
+	void Application::DrawGUI() {
+		PV_PROFILE_FUNCTION();
+
+		for (auto & layer : m_LayerStack) {
+			layer->OnImGuiUpdate();
+		}
+
 		StrongHandle<OrthoCamera> cam = new OrthoCamera(0, Window::Ref().GetWidth(), Window::Ref().GetHeight(), 0);
 		MVPStack::Ref().Projection().Push(cam->GetProjectionView());
-		Renderer2D::Ref().BeginScene(cam);
-
-		ImGuiManager::Ref().DetectConsumeInputs();
-		ImGuiManager::Ref().PreUpdate();
-
-		ImGui::Begin("LOL", Vec2i(100));
-		ImGui::End();
+		Renderer2D::Ref().BeginScene();
 
 		ImGuiManager::Ref().PostUpdate();
 
@@ -148,6 +156,7 @@ namespace prev {
 	}
 
 	void Application::PostUpdate() {
+		PV_PROFILE_FUNCTION();
 		GraphicsContext::Ref().EndFrame();
 		Input::Update();
 		Window::Ref().Update();

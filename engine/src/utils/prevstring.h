@@ -53,6 +53,10 @@ namespace prev {
 			Deallocate();
 		}
 
+		inline bool empty() {
+			return size() == 0;
+		}
+
 		inline void resize(size_t newsize) {
 			if (m_Ref != nullptr && *m_Ref == 1u && m_AllocatedBufferSize > newsize) {
 				m_Size = newsize;
@@ -61,6 +65,115 @@ namespace prev {
 			}
 			Deallocate();
 			Allocate(newsize);
+		}
+
+		void insert(size_t pos, size_t numChars, const char * str) {
+			if (numChars == 0) return;
+
+			size_t prevSize = size();
+			assert(pos <= prevSize);
+			assert(pos >= 0);
+			size_t newSize = prevSize + numChars;
+			char * newStr = new char[newSize + 1];
+			newStr[newSize] = '\0';
+
+			if (pos == 0) {
+				memcpy(newStr, str, numChars);
+				memcpy(newStr + numChars, m_String, prevSize);
+			} else if (pos < prevSize) {
+				memcpy(newStr, m_String, pos);
+				memcpy(newStr + pos, str, numChars);
+				memcpy(newStr + pos + numChars, m_String + pos, prevSize - pos);
+			} else if (pos == prevSize) {
+				memcpy(newStr, m_String, prevSize);
+				memcpy(newStr + prevSize, str, numChars);
+			} else {
+				assert(false); // Invalid Poisition
+			}
+
+			Deallocate();
+
+			m_String = newStr;
+			m_Size = newSize;
+			m_AllocatedBufferSize = newSize + 1;
+			m_Ref = new unsigned int;
+			*m_Ref = 1u;
+		}
+
+		void insert(size_t pos, char c) {
+			size_t prevSize = size();
+			assert(pos <= prevSize);
+			assert(pos >= 0);
+			size_t newSize = prevSize + 1;
+			char * newStr = new char[newSize + 1];
+			newStr[newSize] = '\0';
+
+			if (pos == 0) {
+				memcpy(newStr + 1, m_String, prevSize);
+				newStr[0] = c;
+			} else if (pos < prevSize) {
+				memcpy(newStr, m_String, pos);
+				newStr[pos] = c;
+				memcpy(newStr + pos + 1, m_String + pos, prevSize - pos);
+			} else if (pos == prevSize) {
+				memcpy(newStr, m_String, prevSize);
+				newStr[prevSize] = c;
+			} else {
+				assert(false); // Invalid Poisition
+			}
+
+			Deallocate();
+
+			m_String = newStr;
+			m_Size = newSize;
+			m_AllocatedBufferSize = newSize + 1;
+			m_Ref = new unsigned int;
+			*m_Ref = 1u;
+		}
+
+		void erase(size_t pos, size_t numChars) {
+			if (numChars == 0) return;
+
+			size_t prevSize = size();
+
+			assert(pos >= 0);
+			assert(pos < prevSize);
+			assert(pos + numChars <= prevSize);
+
+			if (m_Ref != nullptr && *m_Ref == 1) {
+				memcpy(m_String + pos, m_String + pos + numChars, prevSize - (pos + numChars));
+				m_String[prevSize - numChars] = '\0';
+				m_Size = prevSize - numChars;
+				return;
+			}
+
+			size_t newSize = prevSize - numChars;
+			char * newStr = new char[newSize + 1];
+			newStr[newSize] = '\0';
+
+			memcpy(newStr, m_String, pos);
+			memcpy(newStr + pos, m_String + pos + numChars, prevSize - (pos + numChars));
+
+			Deallocate();
+
+			m_String = newStr;
+			m_Size = newSize;
+			m_AllocatedBufferSize = newSize + 1;
+			m_Ref = new unsigned int;
+			*m_Ref = 1u;
+		}
+
+		PrevString substr(size_t start, size_t numChars) {
+			if (numChars == 0 || size() == 0) return PrevString();
+			assert(start >= 0);
+			assert(start < size());
+			if (start + numChars > size()) numChars = size() - start;
+
+			PrevString str;
+			str.Allocate(numChars);
+			memcpy(str.m_String, m_String + start, numChars);
+
+			return str;
 		}
 
 		bool operator==(const char * _str) {

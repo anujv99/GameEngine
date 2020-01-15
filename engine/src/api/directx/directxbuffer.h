@@ -20,6 +20,8 @@ namespace prev {
 		virtual void Bind() const override;
 		virtual void UnBind() const override;
 		virtual void SubData(const void * data, pvsizet size, pvsizet offset) override;
+		virtual void * Map() override;
+		virtual void UnMap() override;
 		virtual void SetBufferLayout(StrongHandle<BufferLayout> layout) override;
 		virtual const StrongHandle<BufferLayout> GetLayout() const override { return m_Layout; }
 		virtual pvuint GetStride() const override { return m_StrideBytes; };
@@ -33,6 +35,7 @@ namespace prev {
 
 		pvuint m_StrideBytes;
 		pvsizet m_Size;
+		pvbool m_IsMapped;
 		BufferUsage m_Usage;
 	};
 

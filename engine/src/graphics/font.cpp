@@ -40,9 +40,20 @@ namespace prev {
 
 		TextureParams params;
 		params.Filtering = TextureFiltering::NEAREST;
-		params.InternalFormat = TextureFormat::R;
+		params.InternalFormat = TextureFormat::RGBA;
+
+		pvubyte * arr = new pvubyte[TEXTURE_SIZE_X * TEXTURE_SIZE_Y * 4];
+		for (pvsizet i = 0, j = 0; i < TEXTURE_SIZE_X * TEXTURE_SIZE_Y * 4; i += 4, j++) {
+			arr[i + 0] = atlas->data[j];
+			arr[i + 1] = atlas->data[j];
+			arr[i + 2] = atlas->data[j];
+			arr[i + 3] = atlas->data[j];
+		}
+
 		m_Texture = Texture2D::Create(Vec2i(TEXTURE_SIZE_X, TEXTURE_SIZE_Y), params);
-		m_Texture->SetData(atlas->data, atlas->width * atlas->height);
+		m_Texture->SetData(arr, TEXTURE_SIZE_X * TEXTURE_SIZE_Y * 4);
+
+		delete[] arr;
 
 		ftgl::texture_font_delete(font);
 		ftgl::texture_atlas_delete(atlas);

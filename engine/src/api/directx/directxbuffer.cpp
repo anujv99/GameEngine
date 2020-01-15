@@ -11,7 +11,7 @@ namespace prev {
 	}
 
 	DirectXVertexBuffer::DirectXVertexBuffer(const void * data, pvsizet size, pvuint stride, BufferUsage usage) :
-		m_StrideBytes(stride), m_Usage(usage), m_Size(size) {
+		m_StrideBytes(stride), m_Usage(usage), m_Size(size), m_IsMapped(false) {
 		PV_PROFILE_FUNCTION();
 
 		ASSERT(size > 0);
@@ -50,9 +50,9 @@ namespace prev {
 			vbsd.SysMemPitch		= 0;
 			vbsd.SysMemSlicePitch	= 0;
 
-			ASSERTM(GetDevice()->CreateBuffer(&vbd, &vbsd, m_Buffer.GetAddressOf()) == S_OK, "Failed to create DirectX vertex buffer");
+			ASSERTM(GetDevice()->CreateBuffer(&vbd, &vbsd, m_Buffer.GetAddressOf()) == S_OK, "[DirectX] Failed to create DirectX vertex buffer");
 		} else {
-			ASSERTM(GetDevice()->CreateBuffer(&vbd, nullptr, m_Buffer.GetAddressOf()) == S_OK, "Failed to create DirectX vertex buffer");
+			ASSERTM(GetDevice()->CreateBuffer(&vbd, nullptr, m_Buffer.GetAddressOf()) == S_OK, "[DirectX] Failed to create DirectX vertex buffer");
 		}
 
 	}
@@ -83,7 +83,8 @@ namespace prev {
 	void DirectXVertexBuffer::SubData(const void * data, pvsizet size, pvsizet offset) {
 		PV_PROFILE_FUNCTION();
 		ASSERT(data);
-		ASSERTM(m_Usage != BufferUsage::USAGE_STATIC, "Cannot use SubData on buffer with Static usage");
+		ASSERT(size + offset <= m_Size);
+		ASSERTM(m_Usage != BufferUsage::USAGE_STATIC, "[DirectX] Cannot use SubData on buffer with Static usage");
 
 		D3D11_MAPPED_SUBRESOURCE msr;
 
@@ -91,6 +92,27 @@ namespace prev {
 		ASSERTM(hr == S_OK, "[DirectX] Unable to map vertex buffer for writing");
 		memcpy_s(msr.pData, static_cast<rsize_t>(m_Size), data, static_cast<rsize_t>(size));
 		GetDeviceContext()->Unmap(m_Buffer.Get(), 0u);
+	}
+
+	void * DirectXVertexBuffer::Map() {
+		PV_PROFILE_FUNCTION();
+		ASSERTM(m_Usage != BufferUsage::USAGE_STATIC, "[DirectX] Cannot use Map on buffer with Static usage");
+		ASSERTM(m_IsMapped == false, "[DirectX] Buffer already mapped. Use UnMap after calling Map");
+
+		D3D11_MAPPED_SUBRESOURCE msr;
+
+		HRESULT hr = GetDeviceContext()->Map(m_Buffer.Get(), 0u, D3D11_MAP_WRITE_DISCARD, 0u, &msr);
+		ASSERTM(hr == S_OK, "[DirectX] Unable to map vertex buffer for writing");
+		m_IsMapped = true;
+		return msr.pData;
+	}
+
+	void DirectXVertexBuffer::UnMap() {
+		PV_PROFILE_FUNCTION();
+		ASSERTM(m_IsMapped == true, "[DirectX] Buffer not mapped. Use Map before calling UnMap");
+
+		GetDeviceContext()->Unmap(m_Buffer.Get(), 0u);
+		m_IsMapped = false;
 	}
 
 	void DirectXVertexBuffer::SetBufferLayout(StrongHandle<BufferLayout> layout) {
@@ -195,7 +217,7 @@ namespace prev {
 		PV_PROFILE_FUNCTION();
 		ASSERT(data);
 		ASSERT(size + offset <= m_Size);
-		ASSERTM(m_Usage != BufferUsage::USAGE_STATIC, "Cannot use SubData on buffer with Static usage");
+		ASSERTM(m_Usage != BufferUsage::USAGE_STATIC, "[DirectX] Cannot use SubData on buffer with Static usage");
 
 		D3D11_MAPPED_SUBRESOURCE msr;
 

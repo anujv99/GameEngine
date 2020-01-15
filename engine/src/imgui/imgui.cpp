@@ -1,14 +1,14 @@
-#include "imgui.h"
-#include "imgui.h"
-#include "imgui.h"
+#include "ImGui.h"
+#include "ImGui.h"
+#include "ImGui.h"
 
 #include "../common/assert.h"
 #include "../core/window.h"
 #include "../core/input.h"
 #include "../renderer/renderer2d.h"
 
-#include "imguiwindow.h"
-#include "imguimanager.h"
+#include "ImGuiwindow.h"
+#include "ImGuimanager.h"
 
 namespace prev {
 
@@ -32,22 +32,24 @@ namespace prev {
 
 	static const pvfloat ROUNDED_RADIUS								= 4.0f;
 
-	static const Vec3 COLOR_WINDOW_BACKGROUND						= Vec3(0.15f);
-	static const Vec3 COLOR_SLIDER_BTN_BORDER						= Vec3(0.0f);
-	static const Vec3 COLOR_SLIDER_BG_BORDER						= Vec3(0.08f);
-	static const Vec3 COLOR_SLIDER									= Vec3(0.25f);
-	static const Vec3 COLOR_SLIDER_ACTIVE							= Vec3(0.55f);
-	static const Vec3 COLOR_BUTTON									= Vec3(0.35f);
-	static const Vec3 COLOR_BUTTON_HOVER							= Vec3(0.45f);
-	static const Vec3 COLOR_BUTTON_PRESS							= Vec3(0.25f);
-	static const Vec3 COLOR_BAR										= Vec3(0.15f);
-	static const Vec3 COLOR_BAR_HOVER								= Vec3(0.30f);
-	static const Vec3 COLOR_FILLBAR									= Vec3(0.6f, 0.6f, 0.0f);
-	static const Vec3 COLOR_SEPARATOR								= Vec3(0.35f);
-	static const Vec3 COLOR_WHITE									= Vec3(1.0f);
-	static const Vec3 COLOR_BLACK									= Vec3(0.0f);
+	static Vec3 COLOR_WINDOW_BACKGROUND								= Vec3(0.2f);
+	static Vec3 COLOR_WINDOW_LINE_UNDER_TTILE						= Vec3(1.0f);
+	static Vec3 COLOR_WINDOW_TITLE									= Vec3(0.1f, 0.7f, 0.4f);
+	static Vec3 COLOR_SLIDER_BTN_BORDER								= Vec3(0.0f);
+	static Vec3 COLOR_SLIDER_BG_BORDER								= Vec3(0.08f);
+	static Vec3 COLOR_SLIDER										= Vec3(0.25f);
+	static Vec3 COLOR_SLIDER_ACTIVE									= Vec3(0.55f);
+	static Vec3 COLOR_BUTTON										= Vec3(0.35f);
+	static Vec3 COLOR_BUTTON_HOVER									= Vec3(0.45f);
+	static Vec3 COLOR_BUTTON_PRESS									= Vec3(0.25f);
+	static Vec3 COLOR_BAR											= Vec3(0.15f);
+	static Vec3 COLOR_BAR_HOVER										= Vec3(0.30f);
+	static Vec3 COLOR_FILLBAR										= Vec3(0.6f, 0.6f, 0.0f);
+	static Vec3 COLOR_SEPARATOR										= Vec3(0.35f);
+	static Vec3 COLOR_WHITE											= Vec3(1.0f);
+	static Vec3 COLOR_BLACK											= Vec3(0.0f);
 
-	static const pvint IMGUI_MOUSE_PRESS_BTN						= MOUSE_BUTTON_LEFT;
+	static const pvint ImGui_MOUSE_PRESS_BTN						= MOUSE_BUTTON_LEFT;
 	static const pvint MOUSEWHEEL_SCROLL_DELTA						= 100;
 
 	enum ButtonState {
@@ -69,18 +71,15 @@ namespace prev {
 	static inline pvint ImGuiTextWidth(const pvstring & str) { return ImGui::FONT_WIDTH * str.size(); }
 
 	static inline void ImGuiPrint(const pvstring & str, Vec2i pos) {
-		StrongHandle<Font> fnt = ImGuiManager::Get()->GetFont();
+		static const Vec2 PADDING = Vec2(0.0f, -5.0f);
 
-		Label l;
-		l.Pos = ToVec2(pos);
-		l.Text = str;
-		l.Align = Label::Alignment::RIGHT;
-		l.Scale = Vec2(10.0f);
-
-		Renderer2D::Ref().DrawText(fnt, l);
+		StrongHandle<ImGuiManager::WindowDrawCall> call = ImGuiManager::Get()->GetDrawCall(ImGuiWorkingWindow());
+		call->Text.push_back(str);
+		call->TextColor.push_back(ImGuiManager::Get()->m_CurrentColor);
+		call->TextPos.push_back(ToVec2(pos) + PADDING);
 	}
 
-	static inline int ImguiGenWidgetId() {
+	static inline int ImGuiGenWidgetID() {
 		return ++(ImGuiState().WidgetCount);
 	}
 
@@ -100,16 +99,16 @@ namespace prev {
 		return ImGuiManager::Get()->State.ActiveWidgetID;
 	}
 
-	static inline Vec2i ImguiGetMousePos() {
+	static inline Vec2i ImGuiGetMousePos() {
 		return Vec2i(Input::GetMousePosition().x, Window::Ref().GetHeight() - Input::GetMousePosition().y);
 	}
 
 	static inline pvbool ImGuiDidMouseJustGoUp() {
-		return Input::IsMouseButtonReleased(IMGUI_MOUSE_PRESS_BTN);
+		return Input::IsMouseButtonReleased(ImGui_MOUSE_PRESS_BTN);
 	}
 
 	static inline pvbool ImGuiDidMouseJustGoDown() {
-		return Input::IsMouseButtonPressed(IMGUI_MOUSE_PRESS_BTN);
+		return Input::IsMouseButtonPressed(ImGui_MOUSE_PRESS_BTN);
 	}
 
 	static inline pvbool ImGuiDidMouseDoubleClick() {
@@ -117,42 +116,44 @@ namespace prev {
 		return false;
 	}
 
-	static inline pvbool ImguiDidMouseWheelGoDown(pvint btn) {
+	static inline pvbool ImGuiDidKeyJustGoDown(pvushort key) {
+		return Input::IsKeyPressed(key);
+	}
+
+	static inline pvbool ImGuiIsKeyDown(pvushort key) {
+		return Input::IsKeyDown(key);
+	}
+
+	static inline std::vector<pvchar> ImGuiGetKeyPressed() {
+		return Input::GetPressedCharacterBuffer();
+	}
+
+	static inline pvbool ImGuiDidMouseWheelGoDown(pvint btn) {
 		return Input::GetMouseScrollDelta().y != 0;
 	}
 
 	static inline void ImGuiColor(Vec3 col, pvfloat alpha = 1.0f) {
-		Renderer2D::Ref().Color(col, alpha);
+		ImGuiManager::Ref().m_CurrentColor = Vec4(col.x, col.y, col.z, alpha);
 	}
 
 	static inline void ImGuiDrawRect(Vec2i pos, Vec2i dimen) {
-		Renderer2D::Ref().DrawRect(Vec2(pos.x + dimen.x / 2.0f, pos.y - dimen.y / 2.0f), ToVec2(dimen));
-	}
-
-	static inline void ImGuiDrawRectWire(Vec2i pos, Vec2i dimen) {
-		Renderer2D::Ref().DrawRectWire(Vec2(pos.x + dimen.x / 2.0f, pos.y - dimen.y / 2.0f), ToVec2(dimen));
-	}
-
-	static inline void ImGuiDrawRectRounded(Vec2i pos, Vec2i dimen, pvfloat radius) {
-		Renderer2D::Ref().DrawRect(Vec2(pos.x + dimen.x / 2.0f, pos.y - dimen.y / 2.0f), ToVec2(dimen));
-	}
-
-	static inline void ImGuiDrawRectRoundedWire(Vec2i pos, Vec2i dimen, pvfloat radius) {
-		Renderer2D::Ref().DrawRectWire(Vec2(pos.x + dimen.x / 2.0f, pos.y - dimen.y / 2.0f), ToVec2(dimen));
-	}
-
-	static inline void ImGuiDrawRectRoundedTop(Vec2i pos, Vec2i dimen, pvfloat radius) {
-		Renderer2D::Ref().DrawRect(Vec2(pos.x + dimen.x / 2.0f, pos.y - dimen.y / 2.0f), ToVec2(dimen));
+		StrongHandle<ImGuiManager::WindowDrawCall> call = ImGuiManager::Get()->GetDrawCall(ImGuiWorkingWindow());
+		call->QuadPos.push_back(Vec2(pos.x + dimen.x / 2.0f, pos.y - dimen.y / 2.0f));
+		call->QuadDimen.push_back(ToVec2(dimen));
+		call->QuadColor.push_back(ImGuiManager::Ref().m_CurrentColor);
 	}
 
 	static inline void ImGuiDrawLine(Vec2i start, Vec2i end) {
-		Renderer2D::Ref().DrawLine(ToVec2(start), ToVec2(end));
+		StrongHandle<ImGuiManager::WindowDrawCall> call = ImGuiManager::Get()->GetDrawCall(ImGuiWorkingWindow());
+		call->QuadPos.push_back(Vec2(start.x + (end.x - start.x) / 2.0f, start.y));
+		call->QuadDimen.push_back(Vec2(end.x - start.x, 1.0f));
+		call->QuadColor.push_back(ImGuiManager::Ref().m_CurrentColor);
 	}
 
 	static pvbool ImGuiMouseOver(Vec2i pos, Vec2i dimen) {
 		if (ImGuiWorkingWindow()->IsLocked) return false;
 
-		const Vec2i mousePos = ImguiGetMousePos();
+		const Vec2i mousePos = ImGuiGetMousePos();
 		pvint mX = mousePos.x;
 		pvint mY = mousePos.y;
 
@@ -184,9 +185,9 @@ namespace prev {
 			// Mouse Scroll
 			if (!window->AutoSize) {
 				const pvint scrollDelta = MOUSEWHEEL_SCROLL_DELTA;
-				if (ImguiDidMouseWheelGoDown(0)) {
+				if (ImGuiDidMouseWheelGoDown(0)) {
 					window->ScrollPos.y = Min(window->ScrollPos.y + scrollDelta, Max(1, window->DimenAutoSize.y - window->Dimen.y));
-				} else if (ImguiDidMouseWheelGoDown(1)) {
+				} else if (ImGuiDidMouseWheelGoDown(1)) {
 					window->ScrollPos.y = Max(window->ScrollPos.y - scrollDelta, 0);
 				}
 			}
@@ -200,7 +201,7 @@ namespace prev {
 
 		if (!ImGuiIsMinimized()) {
 			ImGuiColor(COLOR_WINDOW_BACKGROUND, window->BackgroundAlpha);
-			ImGuiDrawRectRounded(window->Pos - Vec2i(0, ImGui::TITLE_BAR_HEIGHT), window->Dimen - Vec2i(0, ImGui::TITLE_BAR_HEIGHT), ROUNDED_RADIUS);
+			ImGuiDrawRect(window->Pos - Vec2i(0, ImGui::TITLE_BAR_HEIGHT), window->Dimen - Vec2i(0, ImGui::TITLE_BAR_HEIGHT));
 		}
 	}
 
@@ -211,7 +212,7 @@ namespace prev {
 		const Vec3 COLOR_TEXT = COLOR_WHITE;
 
 		ButtonState result = BUTTON_NONE;
-		const pvint id = ImguiGenWidgetId();
+		const pvint id = ImGuiGenWidgetID();
 		const pvint buttonHeight = ImGui::FONT_HEIGHT + padding * 2;
 
 		const int fontWidth = ImGuiTextWidth(name);
@@ -250,8 +251,6 @@ namespace prev {
 		// Draw Button
 		ImGuiColor(buttonColor);
 		ImGuiDrawRect(pos, dimen);
-		ImGuiColor(COLOR_BORDER);
-		ImGuiDrawRectWire(pos, dimen);
 		ImGuiColor(COLOR_TEXT);
 		ImGuiPrint(name, pos + Vec2i(padding, -padding));
 
@@ -262,11 +261,10 @@ namespace prev {
 
 	static void ImGuiTitleBar(StrongHandle<ImGuiWindow> & window, const pvstring & name, pvint id) {
 		const pvint MINIMIZED_BUTTON_PADDING = WIDGET_PADDING;
-		const Vec3 COLOR_WINDOW_TITLE = Vec3(0.1f, 0.7f, 0.4f);
 		const pvint BUTTON_HEIGHT = ImGui::FONT_HEIGHT + BUTTON_INSIDE_PADDING * 2;
 
 		pvbool isWindowActive = ImGuiIsWindowActive();
-		const Vec2i mousePos = ImguiGetMousePos();
+		const Vec2i mousePos = ImGuiGetMousePos();
 
 		// Draw title bar background
 		Vec2i titleBarDimen = Vec2i(window->Dimen.x, ImGui::TITLE_BAR_HEIGHT);
@@ -276,12 +274,12 @@ namespace prev {
 
 		// Draw rect
 		if (window->IsMinimized) {
-			ImGuiDrawRectRounded(window->Pos, titleBarDimen, ROUNDED_RADIUS);
+			ImGuiDrawRect(window->Pos, titleBarDimen);
 		} else {
-			ImGuiDrawRectRoundedTop(window->Pos, titleBarDimen, ROUNDED_RADIUS);
+			ImGuiDrawRect(window->Pos, titleBarDimen);
 
 			// Line under title bar
-			ImGuiColor(COLOR_WINDOW_BACKGROUND);
+			ImGuiColor(COLOR_WINDOW_LINE_UNDER_TTILE);
 			ImGuiDrawLine(window->Pos + Vec2i(0, -ImGui::TITLE_BAR_HEIGHT), window->Pos + Vec2i(window->Dimen.x, -ImGui::TITLE_BAR_HEIGHT));
 		}
 
@@ -352,7 +350,7 @@ namespace prev {
 		pvfloat scrollRatioX = Saturate(static_cast<pvfloat>(window->ScrollPos.x) / (Max(window->DimenAutoSize.x, window->DimenAutoSizePrev.x) - window->Dimen.x));
 		Vec2i sliderPos = Vec2i(static_cast<pvint>(Lerp(static_cast<pvfloat>(sliderPosMinX), static_cast<pvfloat>(sliderPosMaxX), scrollRatioX), barPos.y));
 
-		const pvint mouseX = ImguiGetMousePos().x;
+		const pvint mouseX = ImGuiGetMousePos().x;
 
 		// Mosue Over
 		if (ImGuiMouseOver(barPos, barDimen)) {
@@ -388,14 +386,10 @@ namespace prev {
 		// Draw background
 		ImGuiColor(barColor);
 		ImGuiDrawRect(barPos, barDimen);
-		ImGuiColor(COLOR_SLIDER_BG_BORDER);
-		ImGuiDrawRectWire(barPos, barDimen);
 
 		// Draw slider
 		ImGuiColor(sliderColor);
-		ImGuiDrawRectRounded(sliderPos, sliderDimen, ROUNDED_RADIUS);
-		ImGuiColor(COLOR_SLIDER_BTN_BORDER);
-		ImGuiDrawRectRoundedWire(sliderPos, sliderDimen, ROUNDED_RADIUS);
+		ImGuiDrawRect(sliderPos, sliderDimen);
 
 		return true;
 	}
@@ -429,7 +423,7 @@ namespace prev {
 		pvfloat scrollRatioY = Saturate(static_cast<pvfloat>(window->ScrollPos.y) / static_cast<pvfloat>(Max(window->DimenAutoSize.y, window->DimenAutoSizePrev.y) - window->Dimen.y));
 		Vec2i sliderPos = Vec2i(barPos.x, static_cast<pvint>(Lerp(static_cast<pvfloat>(sliderPosMinY), static_cast<pvfloat>(sliderPosMaxY), scrollRatioY)));
 
-		const pvint mouseY = ImguiGetMousePos().y;
+		const pvint mouseY = ImGuiGetMousePos().y;
 
 		// Mosue Over
 		if (ImGuiMouseOver(barPos, barDimen)) {
@@ -465,16 +459,71 @@ namespace prev {
 		// Draw background
 		ImGuiColor(barColor);
 		ImGuiDrawRect(barPos, barDimen);
-		ImGuiColor(COLOR_SLIDER_BG_BORDER);
-		ImGuiDrawRectWire(barPos, barDimen);
 
 		// Draw slider
 		ImGuiColor(sliderColor);
-		ImGuiDrawRectRounded(sliderPos, sliderDimen, ROUNDED_RADIUS);
-		ImGuiColor(COLOR_SLIDER_BTN_BORDER);
-		ImGuiDrawRectRoundedWire(sliderPos, sliderDimen, ROUNDED_RADIUS);
+		ImGuiDrawRect(sliderPos, sliderDimen);
 
 		return true;
+	}
+
+	static pvfloat ImGuiSlider(pvint id, pvfloat percent) {
+		const pvint SLIDER_WIDTH = 150;
+		const pvint SLIDER_HEIGHT = ImGui::FONT_HEIGHT;
+		const pvint BUTTON_WIDTH = 10;
+
+		Vec2i pos = ImGuiState().DrawPos;
+		Vec2i dimen = Vec2i(SLIDER_WIDTH, SLIDER_HEIGHT);
+
+		// Extend size if not autosized
+		if (!ImGuiWorkingWindow()->AutoSize) {
+			dimen.x = Max(dimen.x, ImGuiWorkingWindow()->Dimen.x - WIDGET_PADDING * 2 - WINDOW_INSIDE_PADDING * 2 - ImGui::FONT_WIDTH * 15);
+		}
+
+		Vec3 colorBar = COLOR_BAR;
+		Vec3 colorButton = COLOR_SLIDER;
+
+		//Button position
+		pvint xMin = pos.x + BUTTON_WIDTH / 2;
+		pvint xMax = pos.x + dimen.x - BUTTON_WIDTH / 2;
+
+		if (ImGuiMouseOver(pos, dimen)) {
+			colorBar = COLOR_BAR_HOVER;
+
+			// clicked down
+			if (ImGuiDidMouseJustGoDown() && ImGuiIsWindowActive()) {
+				ImGuiSetActiveWidgetID(id);
+				ImGuiState().Data.F = 0.0f;
+			}
+		}
+
+		if (ImGuiIsWidgetActive(id)) {
+			// released
+			if (ImGuiDidMouseJustGoUp()) {
+				ImGuiSetActiveWidgetID(ImGuiManager::ImGuiStateStruct::WIDGET_NULL);
+			}
+
+			pvint mouseX = ImGuiGetMousePos().x;
+			percent = Saturate(pvfloat(mouseX - xMin) / (xMax - xMin));
+
+			colorButton = COLOR_SLIDER_ACTIVE;
+		}
+
+		// background
+		ImGuiColor(colorBar);
+		ImGuiDrawRect(pos, dimen);
+
+		// draw button
+		pvint xPos = (pvint)Lerp((pvfloat)xMin, (pvfloat)xMax, Saturate(percent));
+		Vec2i buttonDimen = Vec2i(BUTTON_WIDTH, SLIDER_HEIGHT - 1);
+		Vec2i buttonPos = Vec2i(xPos - BUTTON_WIDTH / 2, pos.y);
+		ImGuiColor(colorButton);
+		ImGuiDrawRect(buttonPos, buttonDimen);
+
+		// move draw cursor
+		ImGui::MoveDrawPosNextLine(dimen);
+
+		return percent;
 	}
 
 	static inline Vec2i ImGuiGetScrollBarDimenOffset(StrongHandle<ImGuiWindow> & window) {
@@ -489,7 +538,7 @@ namespace prev {
 
 		const Vec2i pos = window->Pos + Vec2i(window->Dimen.x, -window->Dimen.y) + Vec2i(-SCROLL_BAR_SIZE, SCROLL_BAR_SIZE);
 		const Vec2i dimen = Vec2i(SCROLL_BAR_SIZE);
-		const Vec2i mousePos = ImguiGetMousePos();
+		const Vec2i mousePos = ImGuiGetMousePos();
 
 		Vec3 color = COLOR_SLIDER;
 
@@ -523,8 +572,6 @@ namespace prev {
 		// Background
 		ImGuiColor(color);
 		ImGuiDrawRect(pos, dimen);
-		ImGuiColor(COLOR_BLACK);
-		ImGuiDrawRectWire(pos, dimen);
 
 		// Line
 		const pvint LINE_PADDING = 2;
@@ -553,9 +600,9 @@ namespace prev {
 			ASSERTM(false, "Forgot to call ImGui::End");
 		}
 
-		const pvint id = ImguiGenWidgetId();
+		const pvint id = ImGuiGenWidgetID();
 		ASSERT(id == ImGuiManager::ImGuiStateStruct::WIDGET_WINDOW);
-		const Vec2i mousePos = ImguiGetMousePos();
+		const Vec2i mousePos = ImGuiGetMousePos();
 		const Vec2i windowSize = Vec2i(Window::Ref().GetWidth(), Window::Ref().GetHeight());
 
 		// Set Render
@@ -623,14 +670,10 @@ namespace prev {
 		const int shadowOffset = 1;
 		const int shadowSize = 4;
 		ImGuiColor(COLOR_BLACK, 0.2f);
-		ImGuiDrawRectRounded(window->Pos + Vec2i(shadowOffset, -shadowOffset), borderDimen + Vec2i(shadowSize), ROUNDED_RADIUS);
+		ImGuiDrawRect(window->Pos + Vec2i(shadowOffset, -shadowOffset), borderDimen + Vec2i(shadowSize));
 
 		ImGuiWindowBG(window);
 		ImGuiTitleBar(window, name, id);
-
-		// Rounded border
-		ImGuiColor(COLOR_WINDOW_BACKGROUND * 0.75f);
-		ImGuiDrawRectRoundedWire(window->Pos, borderDimen, ROUNDED_RADIUS);
 
 		// Show scroll bars
 		if (!window->AutoSize) {
@@ -696,7 +739,7 @@ namespace prev {
 			// If no widget is selected and use clicked on the widget, set it to drag
 			if (ImGuiGetActiveWidgetID() == ImGuiManager::ImGuiStateStruct::WIDGET_NULL &&
 				isMouseInWindow && mouseClicked && !window->IsMinimized) {
-				Vec2i mousePos = ImguiGetMousePos();
+				Vec2i mousePos = ImGuiGetMousePos();
 				ImGuiSetActiveWidgetID(ImGuiManager::ImGuiStateStruct::WIDGET_WINDOW);
 				ImGuiState().Data.IVec[0] = mousePos.x - window->Pos.x;
 				ImGuiState().Data.IVec[1] = mousePos.y - window->Pos.y;
@@ -723,6 +766,252 @@ namespace prev {
 
 		ImGui::MoveDrawPosBy(dimen + Vec2i(0, WIDGET_PADDING));
 		ImGuiState().DrawPos.x = window->Pos.x + WINDOW_INSIDE_PADDING + TAB_WIDTH * ImGuiState().NumTabs;
+	}
+
+	void ImGui::SameLine() {
+		if (ImGuiIsMinimized()) return;
+		ImGuiState().DrawPos = ImGuiState().DrawPosPrev;
+	}
+
+	void ImGui::Print(pvstring str) {
+		if (ImGuiIsMinimized() || str.size() <= 0) return;
+
+		pvint textWidth = ImGuiTextWidth(str);
+		ImGuiColor(COLOR_WHITE);
+		ImGuiPrint(str, ImGuiState().DrawPos);
+		MoveDrawPosNextLine(Vec2i(textWidth, ImGui::FONT_HEIGHT));
+	}
+
+	void ImGui::Seperator() {
+		if (ImGuiIsMinimized()) return;
+
+		const pvint PADDING = WIDGET_PADDING;
+
+		StrongHandle<ImGuiWindow> window = ImGuiWorkingWindow();
+
+		Vec2i pos = ImGuiState().DrawPos - Vec2i(0, PADDING);
+		Vec2i dimen = Vec2i(window->Dimen.x, 0);
+
+		ImGuiColor(COLOR_BLACK, 0.6f);
+		ImGuiDrawLine(pos, pos + Vec2i(window->Dimen.x - WINDOW_INSIDE_PADDING * 2, 0));
+
+		ImGuiColor(COLOR_SEPARATOR);
+		ImGuiDrawLine(pos - Vec2i(0, 1), pos - Vec2i(0, 1) + Vec2i(window->Dimen.x - WINDOW_INSIDE_PADDING * 2, 0));
+
+		MoveDrawPosNextLine(Vec2i(1, dimen.y + PADDING * 2 + 1));
+	}
+
+	// Widgets
+
+	pvfloat ImGui::SliderFloat(pvstring name, pvfloat & val, pvfloat min, pvfloat max) {
+		if (ImGuiIsMinimized()) return val;
+		const pvint id = ImGuiGenWidgetID();
+
+		Print(name);
+
+		// Value
+		pvfloat sliderVal = min + ImGuiSlider(id, (val - min) / (max - min)) * (max - min);
+		val = sliderVal;
+
+		// Print Text
+		SameLine();
+		Print(std::to_string(val));
+
+		return val;
+	}
+
+	Vec3 ImGui::SliderRGB(pvstring name, Vec3 & val) {
+		if (ImGuiIsMinimized()) return val;
+		ImGuiGenWidgetID();
+
+		Print(name);
+
+		// Draw color block
+
+		SameLine();
+		Vec2i pos = ImGuiState().DrawPos;
+		Vec2i dimen = Vec2i(ImGui::FONT_HEIGHT * 2, ImGui::FONT_HEIGHT);
+		ImGuiColor(val);
+		ImGuiDrawRect(pos, dimen);
+		MoveDrawPosNextLine(dimen);
+
+		const Vec3 min(0.0f);
+		const Vec3 max(1.0f);
+
+		SliderFloat(nullptr, val.x, min.x, max.x);
+		SliderFloat(nullptr, val.y, min.y, max.y);
+		SliderFloat(nullptr, val.z, min.z, max.z);
+
+		return val;
+	}
+
+	int ImGui::TextInput(const pvstring & name, pvstring & val, pvint width) {
+
+		const pvfloat KEYPRESS_COOLDOWN = 0.4f;
+		const pvfloat KEYHOLD_COOLDOWN = 0.04f;
+
+		if (ImGuiIsMinimized()) return 0;
+		const pvint id = ImGuiGenWidgetID();
+
+		//Title
+		ImGui::Print(name);
+
+		Vec2i pos = ImGuiState().DrawPos;
+		Vec2i dimen = Vec2i(width, FILLBAR_HEIGHT);
+		Vec3 colorBar = COLOR_BAR;
+		Vec3 colorBorder = COLOR_BLACK;
+		pvint numCharSlots = (dimen.x - FILLBAR_TEXT_BUFFER * 2) / ImGui::FONT_WIDTH;
+
+		//Get carret pos
+		pvint & caretStart = ImGuiState().Data.IVec[0];
+		pvint & caretPos = ImGuiState().Data.IVec[1];
+
+		if (ImGuiIsWidgetActive(id)) {
+			caretStart = Clamp(caretStart, 0, Max(0, (pvint)val.size() - 1));
+			caretPos = Clamp(caretPos, caretStart, caretStart + Min(numCharSlots - 1, (pvint)val.size()));
+		}
+
+		pvfloat & heldKeyCooldown = ImGuiState().Data.FVec[2];
+
+		if (ImGuiMouseOver(pos, dimen)) {
+			colorBar = COLOR_BAR_HOVER;
+
+			//Clicked Down
+			if (ImGuiDidMouseJustGoDown() && !ImGuiIsWidgetActive(id) && ImGuiIsWindowActive()) {
+				ImGuiSetActiveWidgetID(id);
+				ImGuiState().DoesWindowConsumeTextInput = true;
+
+				caretStart = Max((pvint)val.size() - numCharSlots + 1, 0);	//Start
+				caretPos = caretStart + Min(numCharSlots - 1, (int)val.size()); //Position
+				heldKeyCooldown = 0.0f;
+			}
+		}
+
+		if (ImGuiIsWidgetActive(id)) {
+			colorBorder = COLOR_WHITE;
+
+			int caretDelta = 0;
+
+			// returned
+			if (ImGuiDidKeyJustGoDown(KEY_ENTER)) {
+				//ImGuiSetActiveWidgetId(ImGuiManager::State::WIDGET_NULL);
+				return 1;
+			}
+
+			// did user type a key?
+			std::vector<pvchar> cb = ImGuiGetKeyPressed();
+
+			for (char & ch : cb) {
+				val.insert(caretPos, ch);
+				caretDelta++;
+			}
+
+			{
+				// keys that can be held down
+				pvushort heldKey = 0;
+				const pvushort holdableKeys[] = { KEY_LEFT, KEY_RIGHT, KEY_DELETE, KEY_BACKSPACE };
+				for (pvushort i = 0; i < std::size(holdableKeys); ++i) {
+					// just pressed down
+					if (ImGuiDidKeyJustGoDown(holdableKeys[i])) // firstime press
+					{
+						heldKeyCooldown = KEYPRESS_COOLDOWN;
+						heldKey = holdableKeys[i];
+						break;
+					} else if (ImGuiIsKeyDown(holdableKeys[i])) // held down
+					{
+						heldKeyCooldown -= Timer::GetDeltatTime().GetS();
+
+						if (heldKeyCooldown <= 0.0f) {
+							heldKeyCooldown = KEYHOLD_COOLDOWN;
+							heldKey = holdableKeys[i];
+							break;
+						}
+					}
+				}
+
+				if (heldKey) {
+					if (heldKey == KEY_LEFT) {
+						caretDelta--;
+					} else if (heldKey == KEY_RIGHT) {
+						caretDelta++;
+					} else if (heldKey == KEY_DELETE) {
+						if (caretPos < (pvint)val.size()) val.erase(caretPos, 1);
+					} else if (heldKey == KEY_BACKSPACE) {
+						if (!val.empty() && caretPos - 1 >= 0) {
+							val.erase(caretPos - 1, 1);
+							--caretDelta;
+						}
+					}
+				} else if (ImGuiDidKeyJustGoDown(KEY_HOME)) {
+					caretPos = caretStart = 0;
+				} else if (ImGuiDidKeyJustGoDown(KEY_END)) {
+					caretStart = Max((pvint)val.size() - numCharSlots + 1, 0); // start
+					caretPos = caretStart + Min(numCharSlots - 1, (pvint)val.size()); // position
+				}
+			}
+
+			// move caret left
+			if (caretDelta == -1) {
+				caretPos = Max(caretPos - 1, 0);
+				if (caretPos < caretStart) caretStart -= 1;
+
+				// handle case where deleting
+				if (caretStart > 0 && caretPos >= (int)val.size() && (caretStart - caretPos) < numCharSlots) {
+					--caretStart;
+				}
+			}
+
+			// move caret right
+			else if (caretDelta == 1) {
+				if ((int)val.size() > numCharSlots) // if str is longer than num slots
+				{
+					if (caretPos < (int)val.size()) ++caretPos;
+				} else if (caretPos < (int)val.size()) {
+					++caretPos;
+				}
+
+				if (caretPos - caretStart >= numCharSlots) {
+					++caretStart;
+				}
+			}
+		}
+
+		// draw rect
+		ImGuiColor(colorBar);
+		ImGuiDrawRect(pos, dimen);
+
+		// tex position
+		Vec2i textPos = pos + Vec2i(FILLBAR_TEXT_BUFFER, -FILLBAR_TEXT_BUFFER);
+		int characterStart = 0;
+		int characterEnd = Min((int)val.size(), numCharSlots);
+
+		// substr with caret positions
+		if (ImGuiIsWidgetActive(id)) {
+			characterStart = caretStart;
+			characterEnd = caretStart + numCharSlots;
+		}
+
+		// draw text
+		int numCharsPrint = Min(characterEnd - characterStart, numCharSlots);
+		ImGuiColor(COLOR_WHITE);
+		ImGuiPrint(val.substr(characterStart, numCharsPrint), textPos);
+
+		// do "text_" blinking
+		if (ImGuiIsWidgetActive(id) && fmod(Timer::GetTime().GetS(), 1.0f) < 0.5f) {
+			Vec2i underlinePos = textPos + ImGui::FONT_WIDTH * Vec2i(caretPos - caretStart, 0);
+			ImGuiPrint("_", underlinePos - Vec2i(0, 1));
+		}
+
+		MoveDrawPosNextLine(dimen);
+		return 0;
+	}
+
+	void ImGui::PropertyEditor() {
+		Begin("Property Editor");
+		SliderRGB("Window Title", COLOR_WINDOW_TITLE);
+		Seperator();
+		SliderRGB("Window background", COLOR_WINDOW_BACKGROUND);
+		End();
 	}
 
 }

@@ -100,6 +100,7 @@ namespace prev {
 	void OpenGLTexture2D::UnBind() const {}
 
 	void OpenGLTexture2D::SetData(const pvubyte * pixels, pvsizet size) {
+		PV_PROFILE_FUNCTION();
 		ASSERT(pixels);
 		ASSERT(size > 0u);
 		if (size != static_cast<pvsizet>(m_BytesPerPixel) * static_cast<pvsizet>(m_Width) * static_cast<pvsizet>(m_Height)) {

@@ -11,7 +11,7 @@ namespace prev {
 	}
 
 	OpenGLVertexBuffer::OpenGLVertexBuffer(const void * data, pvsizet size, pvuint stride, BufferUsage usage) : 
-		m_ID(0u), m_StrideBytes(stride), m_Layout(nullptr) , m_Size(size) {
+		m_ID(0u), m_StrideBytes(stride), m_Layout(nullptr) , m_Size(size), m_Usage(usage), m_IsMapped(false) {
 		PV_PROFILE_FUNCTION();
 		ASSERT(size > 0);
 		glCreateBuffers(1, &m_ID);
@@ -36,9 +36,29 @@ namespace prev {
 	void OpenGLVertexBuffer::SubData(const void * data, pvsizet size, pvsizet offset) {
 		PV_PROFILE_FUNCTION();
 		ASSERT(data);
-		ASSERT(size <= m_Size);
+		ASSERT(size + offset <= m_Size);
+		ASSERTM(m_Usage != BufferUsage::USAGE_STATIC, "[OpenGL] Cannot use SubData on buffer with Static usage");
 		glBindBuffer(GL_ARRAY_BUFFER, m_ID);
 		glBufferSubData(GL_ARRAY_BUFFER, static_cast<GLintptr>(offset), static_cast<GLsizeiptr>(size), data);
+	}
+
+	void * OpenGLVertexBuffer::Map() {
+		PV_PROFILE_FUNCTION();
+		ASSERTM(m_Usage != BufferUsage::USAGE_STATIC, "[OpenGL] Cannot use SubData on buffer with Static usage");
+		ASSERTM(m_IsMapped == false, "[OpenGL] Buffer already mapped. Use UnMap after calling Map");
+
+		void * mb = glMapNamedBuffer(m_ID, GL_WRITE_ONLY);
+		ASSERTM(mb, "[OpenGL] Failed to map buffer");
+		m_IsMapped = true;
+		return mb;
+	}
+
+	void OpenGLVertexBuffer::UnMap() {
+		PV_PROFILE_FUNCTION();
+		ASSERTM(m_IsMapped == true, "[OpenGL] Buffer not mapped. Use Map before calling UnMap");
+
+		ASSERTM(glUnmapNamedBuffer(m_ID) == GL_TRUE, "[OpenGL] Failed to UnMap buffer");
+		m_IsMapped = false;
 	}
 
 	void OpenGLVertexBuffer::SetBufferLayout(StrongHandle<BufferLayout> layout) {
@@ -94,9 +114,8 @@ namespace prev {
 	void OpenGLUniformBuffer::SubData(const void * data, pvsizet size, pvsizet offset) {
 		PV_PROFILE_FUNCTION();
 		ASSERT(data);
-		ASSERT(size <= m_Size);
-		glBindBuffer(GL_UNIFORM_BUFFER, m_ID);
-		glBufferSubData(GL_UNIFORM_BUFFER, static_cast<GLintptr>(offset), static_cast<GLsizeiptr>(size), data);
+		ASSERT(size + offset <= m_Size);
+		glNamedBufferSubData(m_ID, static_cast<GLintptr>(offset), static_cast<GLsizeiptr>(size), data);
 	}
 
 }

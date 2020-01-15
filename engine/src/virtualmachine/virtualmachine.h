@@ -14,8 +14,12 @@ namespace prev {
 	public:
 		void DoString(const pvstring & script);
 		Config ReadConfigFile(const pvstring & path);
+
+		void Run(const pvstring & script);
+		void Update();
 	private:
 		lua_State * L;
+		pvbool m_IsCalled = false;
 	};
 
 }

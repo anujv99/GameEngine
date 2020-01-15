@@ -26,6 +26,8 @@ namespace prev {
 		virtual void Bind() const = 0;
 		virtual void UnBind() const = 0;
 		virtual void SubData(const void * data, pvsizet size, pvsizet offset) = 0;
+		virtual void * Map() = 0;
+		virtual void UnMap() = 0;
 		virtual const StrongHandle<BufferLayout> GetLayout() const = 0;
 		virtual void SetBufferLayout(StrongHandle<BufferLayout> layout) = 0;
 		virtual pvuint GetStride() const = 0;

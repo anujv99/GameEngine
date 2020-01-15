@@ -1,10 +1,10 @@
-#include "imguiwindow.h"
+#include "ImGuiwindow.h"
 
 namespace prev {
 
 	ImGuiWindow::ImGuiWindow() :
 		Pos(-1),
-		Dimen(1),
+		Dimen(0),
 		DimenAutoSize(0),
 		DimenAutoSizePrev(0),
 		ScrollPos(0),

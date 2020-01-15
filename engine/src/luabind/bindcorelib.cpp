@@ -14,13 +14,13 @@ namespace prev {
 		LUA_LIB_ENTRY("GetHeight", [](lua_State * L) -> int { lua_pushinteger(L, static_cast<lua_Integer>(Window::Ref().GetHeight())); return 1; })
 		LUA_LIB_ENTRY("GetTitle", [](lua_State * L) -> int { lua_pushstring(L, Window::Ref().GetTitle().c_str()); return 1; })
 
-		LUA_LIB_ENTRY("SetWidth", [](lua_State * L) -> int { if (lua_gettop(L) != 1 && lua_type(L, -1) != LUA_TNUMBER) { 
+		LUA_LIB_ENTRY("SetWidth", [](lua_State * L) -> int { if (lua_gettop(L) != 1 || lua_type(L, -1) != LUA_TNUMBER) { 
 			VMLogger::Log("Invalid args"); } 
 			else { Window::Ref().SetWidth(static_cast<pvuint>(lua_tointeger(L, -1))); } return 0; })
-		LUA_LIB_ENTRY("SetHeight", [](lua_State * L) -> int { if (lua_gettop(L) != 1 && lua_type(L, -1) != LUA_TNUMBER) {
+		LUA_LIB_ENTRY("SetHeight", [](lua_State * L) -> int { if (lua_gettop(L) != 1 || lua_type(L, -1) != LUA_TNUMBER) {
 			VMLogger::Log("Invalid args");
 			} else { Window::Ref().SetHeight(static_cast<pvuint>(lua_tointeger(L, -1))); } return 0; })
-		LUA_LIB_ENTRY("SetTitle", [](lua_State * L) -> int { if (lua_gettop(L) != 1 && lua_type(L, -1) != LUA_TSTRING) {
+		LUA_LIB_ENTRY("SetTitle", [](lua_State * L) -> int { if (lua_gettop(L) != 1 || lua_type(L, -1) != LUA_TSTRING) {
 			VMLogger::Log("Invalid args");
 			} else { Window::Ref().SetTitle(lua_tostring(L, -1)); } return 0; })
 	LUA_LIB_END(Window)

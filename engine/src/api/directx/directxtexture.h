@@ -25,7 +25,7 @@ namespace prev {
 	private:
 		ComPtr<ID3D11ShaderResourceView> m_View;
 		ComPtr<ID3D11SamplerState> m_Sampler;
-		pvuint m_Width, m_Height, m_BytesPerPixel;
+		pvsizet m_Width, m_Height, m_BytesPerPixel;
 	};
 
 }

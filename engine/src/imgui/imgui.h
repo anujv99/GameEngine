@@ -13,7 +13,18 @@ namespace prev {
 		static void Begin(pvstring name, Vec2i pos = Vec2i(AUTOPOS), Vec2i dimen = Vec2i(AUTOSIZE));
 		static void End();
 
+		static void SameLine();
+		static void Print(pvstring str);
+		static void Seperator();
 
+		// Widgets
+		static pvfloat SliderFloat(pvstring name, pvfloat & val, pvfloat min, pvfloat max);
+
+		static Vec3 SliderRGB(pvstring name, Vec3 & val);
+
+		static int TextInput(const pvstring & name, pvstring & val, pvint width);
+
+		static void PropertyEditor();
 
 		static pvint FONT_WIDTH;
 		static pvint FONT_HEIGHT;

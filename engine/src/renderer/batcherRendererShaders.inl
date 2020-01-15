@@ -8,13 +8,15 @@ static constexpr pvchar DX_V_RENDERER_SHADER[] = R"(
 			float4 oPos : SV_POSITION;
 			float2 oTexCoord : OUT_COORD;
 			int oTexIndex : OUT_TEX_INDEX;
+			float4 oColor : OUT_COLOR;
 		};
 
-		VSOut main(float2 iPos : POSITION, float2 iTexCoord : TEX_COORD, int iTexIndex : TEX_INDEX) {
+		VSOut main(float2 iPos : POSITION, float2 iTexCoord : TEX_COORD, int iTexIndex : TEX_INDEX, float4 iColor : COLOR) {
 			VSOut vso;
 			vso.oPos = mul(projectionView, float4(iPos.x, iPos.y, 0.0f, 1.0f));
 			vso.oTexCoord = iTexCoord;
 			vso.oTexIndex = iTexIndex;
+			vso.oColor = iColor;
 			return vso;
 		}
 )";
@@ -43,12 +45,13 @@ static constexpr pvchar DX_F_RENDERER_SHADER[] = R"(
 			float4 iPos : SV_POSITION;
 			float2 iTexCoord : OUT_COORD;
 			int iTexIndex : OUT_TEX_INDEX;
+			float4 iColor : OUT_COLOR;
 		};
 
 		float4 main(VSIn vsi) : SV_TARGET {
 			float4 outCol;
 
-			if (vsi.iTexIndex == -1) outCol =  float4(1, 1, 1, 1);
+			if (vsi.iTexIndex < 0)		 outCol = float4(1.0f, 1.0f, 1.0f, 1.0f);
 			else if (vsi.iTexIndex == 0) outCol = tex0.Sample(splr0, vsi.iTexCoord);
 			else if (vsi.iTexIndex == 1) outCol = tex1.Sample(splr1, vsi.iTexCoord);
 			else if (vsi.iTexIndex == 2) outCol = tex2.Sample(splr2, vsi.iTexCoord);
@@ -56,7 +59,7 @@ static constexpr pvchar DX_F_RENDERER_SHADER[] = R"(
 			else if (vsi.iTexIndex == 4) outCol = tex4.Sample(splr4, vsi.iTexCoord);
 			else if (vsi.iTexIndex == 5) outCol = tex5.Sample(splr5, vsi.iTexCoord);
 
-			return outCol;
+			return outCol * vsi.iColor;
 		}
 )";
 
@@ -70,13 +73,16 @@ static constexpr pvchar GL_V_RENDERER_SHADER[] = R"(
 		layout (location = 0) in vec2 iPos;
 		layout (location = 1) in vec2 iTexCoord;
 		layout (location = 2) in int iTexIndex;
+		layout (location = 3) in vec4 iColor;
 
 		out vec2 passTexCoord;
+		out vec4 passColor;
 		flat out int passTexIndex;
 
 		void main() {
 			passTexCoord = iTexCoord;
 			passTexIndex = iTexIndex;
+			passColor = iColor;
 			gl_Position = projectionView * vec4(iPos.x, iPos.y, 0.0f, 1.0f);
 		}
 )";
@@ -94,12 +100,13 @@ static constexpr pvchar GL_F_RENDERER_SHADER[] = R"(
 		out vec4 FragColor;
 
 		in vec2 passTexCoord;
+		in vec4 passColor;
 		flat in int passTexIndex;
 
 		void main() {
 			vec4 outCol;
 
-			if (passTexIndex == -1) outCol = vec4(1, 1, 1, 1);
+			if (passTexIndex < 0)	    outCol = vec4(1.0f);					
 			else if (passTexIndex == 0) outCol = texture(tex0, passTexCoord);
 			else if (passTexIndex == 1) outCol = texture(tex1, passTexCoord);
 			else if (passTexIndex == 2) outCol = texture(tex2, passTexCoord);
@@ -107,7 +114,7 @@ static constexpr pvchar GL_F_RENDERER_SHADER[] = R"(
 			else if (passTexIndex == 4) outCol = texture(tex4, passTexCoord);
 			else if (passTexIndex == 5) outCol = texture(tex5, passTexCoord);
 
-			FragColor = outCol;
+			FragColor = outCol * passColor;
 		}
 )";
 

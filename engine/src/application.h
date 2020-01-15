@@ -23,7 +23,7 @@ namespace prev {
 	private:
 		void PreUpdate();
 		void Render();
-		void GUI();
+		void DrawGUI();
 		void PostUpdate();
 
 		void OnEvent(Event & e);

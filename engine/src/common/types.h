@@ -15,10 +15,17 @@ namespace prev {
 	typedef double pvdouble;
 
 	typedef int8_t pvbyte;
-	typedef int32_t pvint;
-	typedef int64_t pvint64;
 	typedef uint8_t pvubyte;
+
+	typedef int16_t pvshort;
+	typedef uint16_t pvushort;
+
+	typedef int32_t pvint;
 	typedef uint32_t pvuint;
+
+	typedef int64_t pvint64;
+	typedef uint64_t pvuint64;
+
 	typedef size_t pvsizet;
 
 	typedef bool pvbool;

@@ -1,9 +1,11 @@
-#include "imguimanager.h"
+#include "ImGuimanager.h"
 
 #include "core/window.h"
 #include "core/input.h"
 
-#include "imgui.h"
+#include "ImGui.h"
+
+#include "renderer/renderer2d.h"
 
 namespace prev {
 
@@ -11,14 +13,15 @@ namespace prev {
 
 	ImGuiManager::ImGuiManager() {
 		m_Font = new Font("../../../../res/fonts/Minecraftia.ttf", 8);
+		m_FontScale = 10.0f;
 		State.Reset();
 
 		Vec2i windowSize = Vec2i(Window::Ref().GetWidth(), Window::Ref().GetHeight());
 		State.MouseRegionStart = Vec2i(0, windowSize.y);
 		State.MouseRegionDimen = windowSize;
 
-		ImGui::FONT_WIDTH = m_Font->GetSizePixels("M").x;
-		ImGui::FONT_HEIGHT = m_Font->GetSizePixels("M").y;
+		ImGui::FONT_WIDTH = m_Font->GetSize("U").x * m_FontScale;
+		ImGui::FONT_HEIGHT = m_Font->GetSize("U").y * m_FontScale;
 	}
 
 	ImGuiManager::~ImGuiManager() {}
@@ -39,6 +42,8 @@ namespace prev {
 	}
 
 	void ImGuiManager::PostUpdate() {
+		DrawWindows();
+
 		m_ConsumeKeyPress.clear();
 		m_ConsumeMouseButtons.clear();
 	}
@@ -83,17 +88,24 @@ namespace prev {
 	}
 
 	void ImGuiManager::BringWindowToFront(StrongHandle<ImGuiWindow> window) {
+		if (window == nullptr) return;
+		pvint index = -1;
 		for (pvsizet i = 0; i < m_VisibleWindows.size(); i++) {
-			auto currWindow = m_VisibleWindows[i];
-			if (window == nullptr) {
-				for (pvsizet j = i; j >= 1; j--) {
-					m_VisibleWindows[j] = m_VisibleWindows[j - 1];
-				}
+			if (m_VisibleWindows[i] == window) {
+				index = i;
 				break;
 			}
 		}
 
-		m_VisibleWindows[0] = window;
+		if (index < 0) return;
+
+		auto win = m_VisibleWindows[index];
+
+		for (pvsizet i = index; i > 0; i--) {
+			m_VisibleWindows[i] = m_VisibleWindows[i - 1];
+		}
+
+		m_VisibleWindows[0] = win;
 	}
 
 	pvint ImGuiManager::GetWindowOrderIndex(pvstring name) const {
@@ -172,11 +184,11 @@ namespace prev {
 	}
 
 	pvbool ImGuiManager::DidMouseJustGoDown(pvint button) const {
-		return pvbool();
+		return Input::IsMouseButtonPressed(button);
 	}
 
 	pvbool ImGuiManager::DidKeyJustGoDown(pvint keyCode) const {
-		return pvbool();
+		return Input::IsKeyPressed(keyCode);
 	}
 
 	StrongHandle<ImGuiWindow> ImGuiManager::GetWindow(pvstring name) {
@@ -243,6 +255,57 @@ namespace prev {
 			auto window = m_VisibleWindows[i];
 			LOG_TRACE("[%d] %s - frameSinceUpdate : %d", i, window->Name.c_str(), window->FramesSinceUpdate);
 		}
+	}
+
+	void ImGuiManager::DrawWindows() {
+		for (auto win = m_VisibleWindows.rbegin(); win != m_VisibleWindows.rend(); win++) {
+			auto drawCall = GetDrawCall(win->Get());
+			if (drawCall == nullptr) continue;
+
+			for (pvsizet i = 0; i < drawCall->QuadPos.size(); i++) {
+				Renderer2D::Ref().DrawSprite(drawCall->QuadPos[i], drawCall->QuadDimen[i], drawCall->QuadColor[i], nullptr);
+			}
+			drawCall->QuadPos.resize(0);
+			drawCall->QuadDimen.resize(0);
+			drawCall->QuadColor.resize(0);
+
+			for (pvsizet i = 0; i < drawCall->TextPos.size(); i++) {
+				Label l;
+				l.Pos = drawCall->TextPos[i];
+				l.Color = drawCall->TextColor[i];
+				l.Scale = Vec2(m_FontScale);
+				l.Text = drawCall->Text[i];
+				l.Align = Label::Alignment::RIGHT;
+
+				Renderer2D::Ref().DrawText(m_Font, l);
+			}
+			drawCall->Text.resize(0);
+			drawCall->TextColor.resize(0);
+			drawCall->TextPos.resize(0);
+		}
+
+		for (auto win : m_WindowDrawCalls) {
+			win.second->QuadPos.resize(0);
+			win.second->QuadDimen.resize(0);
+			win.second->QuadColor.resize(0);
+
+			win.second->Text.resize(0);
+			win.second->TextPos.resize(0);
+			win.second->TextColor.resize(0);
+		}
+	}
+
+	StrongHandle<ImGuiManager::WindowDrawCall> ImGuiManager::GetDrawCall(StrongHandle<ImGuiWindow> window) {
+		ASSERTM(window != nullptr, "Invalid ImGui window");
+
+		uint32_t hash = HashString(window->Name);
+
+		auto it = m_WindowDrawCalls.find(hash);
+		if (it != m_WindowDrawCalls.end()) {
+			return it->second;
+		}
+		m_WindowDrawCalls[hash] = new WindowDrawCall();
+		return m_WindowDrawCalls.find(hash)->second;
 	}
 
 

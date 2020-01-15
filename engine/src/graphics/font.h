@@ -21,6 +21,7 @@ namespace prev {
 		pvstring Text;
 		Vec2 Scale			= Vec2(1.0f);
 		Vec2 Pos			= Vec2(0.0f);
+		Vec4 Color			= Vec4(1.0f);
 		Alignment Align		= Alignment::CENTER;
 	};
 

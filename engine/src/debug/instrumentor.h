@@ -132,8 +132,6 @@ namespace prev {
 
 }
 
-#define ENGINE_PROFILE
-
 #ifdef ENGINE_PROFILE
 	#define PV_PROFILE_BEGIN_SESSION(name, filepath) ::prev::Instrumentor::Get().BeginSession(name, filepath)
 	#define PV_PROFILE_END_SESSION() ::prev::Instrumentor::Get().EndSession()

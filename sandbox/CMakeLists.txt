@@ -26,3 +26,5 @@ if (WIN32)
 elseif(UNIX)
 	add_compile_definitions(ENGINE_LINUX)
 endif()
+
+add_custom_command(TARGET Sandbox POST_BUILD COMMAND copy ${CMAKE_CURRENT_SOURCE_DIR}/../res/* ${CMAKE_CURRENT_BINARY_DIR}/res)
