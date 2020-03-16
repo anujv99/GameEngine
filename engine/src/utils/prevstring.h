@@ -88,7 +88,7 @@ namespace prev {
 				memcpy(newStr, m_String, prevSize);
 				memcpy(newStr + prevSize, str, numChars);
 			} else {
-				assert(false); // Invalid Poisition
+				assert(false); // Invalid Position
 			}
 
 			Deallocate();
@@ -119,7 +119,7 @@ namespace prev {
 				memcpy(newStr, m_String, prevSize);
 				newStr[prevSize] = c;
 			} else {
-				assert(false); // Invalid Poisition
+				assert(false); // Invalid Position
 			}
 
 			Deallocate();
@@ -215,6 +215,12 @@ namespace prev {
 
 		void operator=(const std::string & _str) {
 			*this = _str.c_str();
+		}
+
+		PrevString operator+(const PrevString & _str) {
+			PrevString newStr = *this;
+			newStr.insert(newStr.size(), _str.size(), _str.c_str());
+			return newStr;
 		}
 
 	private:

@@ -5,11 +5,11 @@
 
 namespace prev {
 
-	#include "batcherShaders.inl"
-	#include "batcherRendererShaders.inl"
+	#include "shaders.inl"
 
 	Renderer2D::Renderer2D() {
-		CreateRenderer();
+		CreateRendererObjects();
+		CreateFramebufferObjects();
 
 		m_MVPBuffer = UniformBuffer::Create(static_cast<const void *>(Mat4().GetFloatPtr()), sizeof(Mat4), BufferUsage::USAGE_DYNAMIC);
 		m_MVPBuffer->Bind(m_RendererShader->GetUniformLocation("MVP", ShaderType::VERTEX_SHADER), ShaderType::VERTEX_SHADER);
@@ -17,7 +17,29 @@ namespace prev {
 
 	Renderer2D::~Renderer2D() {}
 
-	void Renderer2D::CreateRenderer() {
+	void Renderer2D::PassFramebuffer(StrongHandle<Framebuffer> from, StrongHandle<Framebuffer> to) {
+		ASSERTM(from != nullptr, "Cannot sample from default framebuffer");
+		if (to != nullptr) {
+			to->Bind();
+		} else {
+			from->UnBind();
+		}
+
+		m_FramebufferRendererVertexArray->Bind();
+		m_FramebufferRendererShader->Bind();
+
+		from->GetTexture()->Bind(0);
+
+		RenderState::Ref().SetTopology(PrimitiveTopology::TOPOLOGY_TRIANGLE);
+
+		m_FramebufferRendererVertexArray->Draw(6);
+
+		if (to != nullptr) {
+			to->UnBind();
+		}
+	}
+
+	void Renderer2D::CreateRendererObjects() {
 		m_RendererBuffer = VertexBuffer::Create(nullptr, MAX_VERTICES * sizeof(RendererVertex), sizeof(RendererVertex), BufferUsage::USAGE_DYNAMIC);
 
 		StrongHandle<BufferLayout> layout = BufferLayout::Create();
@@ -47,6 +69,44 @@ namespace prev {
 		m_RendererVertexArray->AddVertexBuffer(m_RendererBuffer);
 
 		m_Textures.reserve(MAX_TEXTURES);
+	}
+
+	void Renderer2D::CreateFramebufferObjects() {
+		float vertices[] = {
+			-1.0f,  1.0f, 0.0f, 1.0f,
+			 1.0f,  1.0f, 1.0f, 1.0f,
+			 1.0f, -1.0f, 1.0f, 0.0f,
+
+			-1.0f,  1.0f, 0.0f, 1.0f,
+			 1.0f, -1.0f, 1.0f, 0.0f,
+			-1.0f, -1.0f, 0.0f, 0.0f,
+		};
+
+		auto fbobuffer = VertexBuffer::Create(vertices, sizeof(vertices), 4 * sizeof(float), BufferUsage::USAGE_STATIC);
+
+		StrongHandle<BufferLayout> layout = BufferLayout::Create();
+		layout->BeginEntries();
+		layout->AddEntry(DataType::Float2, 0, "POSITION", false);
+		layout->AddEntry(DataType::Float2, 2 * sizeof(float), "TEX_COORD", false);
+		layout->EndEntries();
+
+		fbobuffer->SetBufferLayout(layout);
+
+		StrongHandle<VertexShader> vShader;
+		StrongHandle<FragmentShader> fShader;
+
+		if (GraphicsContext::GetAPI() == GraphicsAPI::API_DIRECTX) {
+			vShader = VertexShader::Create(DX_V_FRAMEBUFFER_SHADER);
+			fShader = FragmentShader::Create(DX_F_FRAMEBUFFER_SHADER);
+		} else {
+			vShader = VertexShader::Create(GL_V_FRAMEBUFFER_SHADER);
+			fShader = FragmentShader::Create(GL_F_FRAMEBUFFER_SHADER);
+		}
+
+		m_FramebufferRendererShader = ShaderProgram::Create(vShader, fShader);
+
+		m_FramebufferRendererVertexArray = VertexArray::Create(vShader);
+		m_FramebufferRendererVertexArray->AddVertexBuffer(fbobuffer);
 	}
 
 	pvint Renderer2D::SubmitTexture(StrongHandle<Texture2D> texture) {

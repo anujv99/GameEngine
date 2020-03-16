@@ -7,6 +7,7 @@ namespace prev {
 		pvuint WindowWidth = 1280u, WindowHeight = 720u;
 		pvstring WindowTitle = "Engine WIndow";
 		pvstring GraphicsAPI = "OPENGL";
+		pvstring ResFolderDir = "";
 	};
 
 }

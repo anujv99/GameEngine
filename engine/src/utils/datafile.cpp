@@ -11,7 +11,7 @@ namespace prev {
 	}
 
 	bool DataFile::OpenFile(const pvstring & path) {
-		if (!FileExists(path)) {
+		if (!FileUtils::FileExists(path)) {
 			LOG_FATAL("File not found : %s", path.c_str());
 			return false;
 		}

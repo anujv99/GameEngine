@@ -9,6 +9,7 @@
 #include "../graphics/vertexarray.h"
 #include "../graphics/texture.h"
 #include "../graphics/font.h"
+#include "../graphics/framebuffer.h"
 
 #include "orthocamera.h"
 
@@ -26,8 +27,13 @@ namespace prev {
 		void DrawSprite(Vec2 pos, Vec2 size, Vec4 color, StrongHandle<Texture2D> texture);
 		void DrawSprite(Vec2 pos, Vec2 size, Vec2 texCoordTopLeft, Vec2 texCoordBottomRight, Vec4 color, StrongHandle<Texture2D> texture);
 		void DrawText(StrongHandle<Font> & font, const Label & label);
+
+		// from framebuffer cannot be the default framebuffer
+		// to pass a framebuffer to the default framebuffer pass to = nullptr
+		void PassFramebuffer(StrongHandle<Framebuffer> from, StrongHandle<Framebuffer> to);
 	private:
-		void CreateRenderer();
+		void CreateRendererObjects();
+		void CreateFramebufferObjects();
 
 		pvint SubmitTexture(StrongHandle<Texture2D> texture);
 	private:
@@ -42,6 +48,9 @@ namespace prev {
 		StrongHandle<VertexArray> m_RendererVertexArray;
 		StrongHandle<ShaderProgram> m_RendererShader;
 		StrongHandle<UniformBuffer> m_MVPBuffer;
+
+		StrongHandle<VertexArray> m_FramebufferRendererVertexArray;
+		StrongHandle<ShaderProgram> m_FramebufferRendererShader;
 
 		RendererVertex * m_Vertices = nullptr;
 		std::vector<StrongHandle<Texture2D>> m_Textures;

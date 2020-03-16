@@ -1,18 +1,29 @@
 
-a = "gg"
+app_path = "res/games/block_game/main.lua"
 
-Game = {
-	Update = function()
-		while (true) do
-			ImGui.Begin("Lua Window")
-			a = ImGui.TextInput("Window Title", a, 100)
-			ImGui.End()
+local make_main = function()
+	
+	local main = {}
 
-			Window.Title = a
+	main.__index = main
 
-			coroutine.yield()
-		end
+	main.current_program = nil
+
+	function main:init()
 	end
-}
 
-co = coroutine.create(Game.Update)
+	function main:update(dt)	--delta time
+	end
+
+	function main:render()
+	end
+
+	function main:gui()
+
+	end
+
+	return main
+end
+
+g_main_app = make_main()
+g_main_app:init()

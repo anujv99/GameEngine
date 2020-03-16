@@ -101,6 +101,10 @@ namespace prev {
 		CreateDepthBuffer(desc);
 	}
 
+	void DirectXContext::BindDefaultRenderTarget() {
+		m_DeviceContext->OMSetRenderTargets(1u, m_RenderTargetView.GetAddressOf(), m_DepthStencilView.Get());
+	}
+
 	void DirectXContext::InitializeDirectX(DXGI_MODE_DESC bufferDesc) {
 		DXGI_SWAP_CHAIN_DESC scd;
 

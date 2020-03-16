@@ -31,6 +31,8 @@ namespace prev {
 		inline ComPtr<ID3D11DeviceContext> GetDeviceContext() { return m_DeviceContext; }
 
 		void ChangeResolution(UINT width, UINT height);
+
+		void BindDefaultRenderTarget();
 	private:
 		void InitializeDirectX(DXGI_MODE_DESC bufferDesc);
 		void CreateRenderTargetView();

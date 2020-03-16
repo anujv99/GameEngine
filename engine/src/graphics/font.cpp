@@ -16,7 +16,7 @@ namespace prev {
 	}
 
 	Font::Font(pvstring file, pvfloat points) : m_Points(points) {
-		ASSERTM(FileExists(file), "Font file not found");
+		ASSERTM(FileUtils::FileExists(file), "Font file not found");
 
 		auto atlas = ftgl::texture_atlas_new(TEXTURE_SIZE_X, TEXTURE_SIZE_Y, 1);
 		auto font = ftgl::texture_font_new_from_file(atlas, static_cast<pvfloat>(points), file.c_str());

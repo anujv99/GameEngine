@@ -14,11 +14,15 @@ namespace prev {
 	class DirectXTexture2D : public Texture2D {
 	public:
 		DirectXTexture2D(Vec2i size, TextureParams params);
+		DirectXTexture2D(D3D11_TEXTURE2D_DESC desc);
+		DirectXTexture2D(D3D11_TEXTURE2D_DESC desc, D3D11_SHADER_RESOURCE_VIEW_DESC vDesc);
 		~DirectXTexture2D();
 	public:
 		virtual void Bind(pvuint slot) const override;
 		virtual void UnBind() const override;
 		virtual void SetData(const pvubyte * pixels, pvsizet size) override;
+
+		ComPtr<ID3D11Texture2D> GetTexture2D();
 	private:
 		void CreateTexture(Vec2i size, TextureParams params);
 		void CreateSampleState(TextureParams params);

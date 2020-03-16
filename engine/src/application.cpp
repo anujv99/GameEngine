@@ -12,6 +12,7 @@
 #include "graphics/vertexarray.h"
 #include "graphics/texture.h"
 #include "graphics/font.h"
+#include "graphics/framebuffer.h"
 
 #include "ImGui/ImGui.h"
 #include "ImGui/ImGuimanager.h"
@@ -21,6 +22,8 @@
 #include "virtualmachine/virtualmachine.h"
 
 #include "math/mvpstack.h"
+
+#include "utils/path.h"
 
 static prev::MemoryLeakDetector s_LeakDetector;
 
@@ -37,6 +40,7 @@ namespace prev {
 		VirtualMachine::CreateInst();
 
 		Config conf = VirtualMachine::Ref().ReadConfigFile("../../../../res/scripts/config.lua");
+		Path::SetResFolderPath(conf.ResFolderDir);
 
 		if (conf.GraphicsAPI == "OPENGL")
 			GraphicsContext::SetGraphicsAPI(GraphicsAPI::API_OPENGL);
@@ -82,7 +86,7 @@ namespace prev {
 		func.AlphaOperation		= BlendOperation::BLEND_OP_ADD;
 		RenderState::Ref().SetBlendFunction(func);
 
-		VirtualMachine::Ref().Run("../../../../res/scripts/main.lua");
+		VirtualMachine::Ref().Init(Path::ToResFolderPath("res/scripts/main.lua"));
 	}
 
 	Application::~Application() {
@@ -104,14 +108,14 @@ namespace prev {
 
 			PreUpdate();
 
-			VirtualMachine::Ref().Update();
+			VirtualMachine::Ref().Update(Timer::GetDeltatTime().GetS());
 
 			Render();
 			
 			DrawGUI();
-			
-			PostUpdate();
 
+			PostUpdate();
+			
 			///LOG_TRACE("Draw Calls : %d", NUMBER_OF_DRAW_CALLS);
 			NUMBER_OF_DRAW_CALLS = 0;
 		}
@@ -127,8 +131,13 @@ namespace prev {
 
 	void Application::Render() {
 		PV_PROFILE_FUNCTION();
+
 		MVPStack::Ref().Projection().Push(m_Camera->GetProjectionView());
 		Renderer2D::Ref().BeginScene();
+
+		VirtualMachine::Ref().Render();
+
+		Renderer2D::Ref().DrawSprite(Vec2(0.0f), Vec2(1.0f), Vec4(1.0f), nullptr);
 
 		for (auto & layer : m_LayerStack) {
 			layer->OnUpdate(0.0f);
@@ -136,10 +145,13 @@ namespace prev {
 
 		Renderer2D::Ref().EndScene();
 		MVPStack::Ref().Projection().Pop();
+
 	}
 
 	void Application::DrawGUI() {
 		PV_PROFILE_FUNCTION();
+
+		VirtualMachine::Ref().Gui();
 
 		for (auto & layer : m_LayerStack) {
 			layer->OnImGuiUpdate();

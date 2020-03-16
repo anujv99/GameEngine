@@ -61,6 +61,50 @@ namespace prev {
 		CreateSampleState(params);
 	}
 
+	DirectXTexture2D::DirectXTexture2D(D3D11_TEXTURE2D_DESC desc) : m_Sampler(nullptr), m_Width(desc.Width), m_Height(desc.Height) {
+		desc.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
+
+
+		Microsoft::WRL::ComPtr<ID3D11Texture2D> d3dtexure;
+		HRESULT hr = GetDevice()->CreateTexture2D(&desc, nullptr, d3dtexure.GetAddressOf());
+		ASSERTM(hr == S_OK, "[DirectX] Failed to create texture2d");
+
+		D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc		= {};
+		srvDesc.Format								= desc.Format;
+		srvDesc.ViewDimension						= D3D11_SRV_DIMENSION_TEXTURE2D;
+		srvDesc.Texture2D.MostDetailedMip			= 0;
+		srvDesc.Texture2D.MipLevels					= 1;
+
+		hr = GetDevice()->CreateShaderResourceView(d3dtexure.Get(), &srvDesc, m_View.GetAddressOf());
+		ASSERTM(hr == S_OK, "[DirectX] Failed to create texture2d shader resource view");
+
+		TextureParams params;
+		params.Filtering		= TextureFiltering::NEAREST;
+		params.Wrapping			= TextureWrapping::CLAMP;
+		params.InternalFormat	= TextureFormat::RGBA;
+
+		CreateSampleState(params);
+	}
+
+	DirectXTexture2D::DirectXTexture2D(D3D11_TEXTURE2D_DESC desc, D3D11_SHADER_RESOURCE_VIEW_DESC vDesc) :
+		m_Sampler(nullptr), m_Width(desc.Width), m_Height(desc.Height) {
+		desc.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
+
+		Microsoft::WRL::ComPtr<ID3D11Texture2D> d3dtexure;
+		HRESULT hr = GetDevice()->CreateTexture2D(&desc, nullptr, d3dtexure.GetAddressOf());
+		ASSERTM(hr == S_OK, "[DirectX] Failed to create texture2d");
+
+		hr = GetDevice()->CreateShaderResourceView(d3dtexure.Get(), &vDesc, m_View.GetAddressOf());
+		ASSERTM(hr == S_OK, "[DirectX] Failed to create texture2d shader resource view");
+
+		TextureParams params;
+		params.Filtering		= TextureFiltering::NEAREST;
+		params.Wrapping			= TextureWrapping::CLAMP;
+		params.InternalFormat	= TextureFormat::RGBA;
+
+		CreateSampleState(params);
+	}
+
 	DirectXTexture2D::~DirectXTexture2D() {}
 
 	void DirectXTexture2D::Bind(pvuint slot) const {
@@ -108,6 +152,17 @@ namespace prev {
 		}
 
 		GetDeviceContext()->Unmap(textureResource.Get(), 0u);
+	}
+
+	prev::ComPtr<ID3D11Texture2D> DirectXTexture2D::GetTexture2D() {
+		ComPtr<ID3D11Resource> res;
+		m_View->GetResource(res.GetAddressOf());
+
+		ComPtr<ID3D11Texture2D> tex;
+		HRESULT hr = res->QueryInterface<ID3D11Texture2D>(tex.GetAddressOf());
+		ASSERTM(hr == S_OK, "[DirectX] Failed to get texture resource");
+
+		return tex;
 	}
 
 	void DirectXTexture2D::CreateTexture(Vec2i size, TextureParams params) {
