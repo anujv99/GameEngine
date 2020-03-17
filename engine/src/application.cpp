@@ -18,6 +18,7 @@
 #include "ImGui/ImGuimanager.h"
 
 #include "renderer/renderer2d.h"
+#include "renderer/immgfx.h"
 
 #include "virtualmachine/virtualmachine.h"
 
@@ -29,6 +30,8 @@ static prev::MemoryLeakDetector s_LeakDetector;
 
 namespace prev {
 	
+	StrongHandle<Framebuffer> fbo;
+
 	pvuint NUMBER_OF_DRAW_CALLS = 0u;
 
 	Application::Application() : m_IsWindowOpen(true) {
@@ -67,6 +70,7 @@ namespace prev {
 		});
 
 		Renderer2D::CreateInst();
+		ImmGFX::CreateInst();
 
 		pvfloat aspect = static_cast<pvfloat>(conf.WindowWidth) / static_cast<pvfloat>(conf.WindowHeight);
 
@@ -87,11 +91,14 @@ namespace prev {
 		RenderState::Ref().SetBlendFunction(func);
 
 		VirtualMachine::Ref().Init(Path::ToResFolderPath("res/scripts/main.lua"));
+
+		fbo = Framebuffer::Create(Vec2i(conf.WindowWidth, conf.WindowHeight), TextureFormat::RGBA);
 	}
 
 	Application::~Application() {
 		MVPStack::DestroyInst();
 		ImGuiManager::DestroyInst();
+		ImmGFX::DestroyInst();
 		Renderer2D::DestroyInst();
 		RenderState::DestroyInst();
 		GraphicsContext::DestroyInst();
@@ -112,7 +119,14 @@ namespace prev {
 
 			Render();
 			
+			fbo->Bind();
+			fbo->Clear();
+
 			DrawGUI();
+
+			fbo->UnBind();
+
+			Renderer2D::Ref().PassFramebuffer(fbo, nullptr);
 
 			PostUpdate();
 			
@@ -135,17 +149,18 @@ namespace prev {
 		MVPStack::Ref().Projection().Push(m_Camera->GetProjectionView());
 		Renderer2D::Ref().BeginScene();
 
-		VirtualMachine::Ref().Render();
+		Renderer2D::Ref().DrawSprite(Vec2(0.0f), Vec2(1.6f, 1.0f), Vec4(1.0f), fbo->GetTexture());
 
-		Renderer2D::Ref().DrawSprite(Vec2(0.0f), Vec2(1.0f), Vec4(1.0f), nullptr);
+		VirtualMachine::Ref().Render();
 
 		for (auto & layer : m_LayerStack) {
 			layer->OnUpdate(0.0f);
 		}
 
+		ImmGFX::Ref().Render();
+
 		Renderer2D::Ref().EndScene();
 		MVPStack::Ref().Projection().Pop();
-
 	}
 
 	void Application::DrawGUI() {

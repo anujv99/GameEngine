@@ -2,50 +2,9 @@
 
 namespace prev {
 
-	Batcher::Batcher(pvsizet maxVertices) :
-		m_Batches(),
-		m_MaxVertices(maxVertices),
-		m_NumVertices(0u), m_CurrentColor(1.0f),
-		m_CurrentBatch(nullptr) {}
+	Batcher::Batcher(size_t maxVertices) : m_CurrentColor(1.0f) {}
 
 	Batcher::~Batcher() {}
-
-	void Batcher::PolygonBegin(PrimitiveTopology topology) {
-		StrongHandle<Batch> batch = GetBatch(topology);
-		ASSERT(batch != nullptr);
-		m_CurrentBatch = batch;
-	}
-
-	void Batcher::PolygonEnd() {
-		m_CurrentBatch = nullptr;
-	}
-
-	void Batcher::Vertex(const Vec2 & pos) {
-		ASSERTM(m_CurrentBatch != nullptr, "Forgot to call PolygonBegin");
-
-		m_CurrentBatch->Vertices[m_CurrentBatch->Index].Reset(pos, m_CurrentColor);
-		m_CurrentBatch->Index++;
-	}
-
-	void Batcher::FlushAll() {
-		PV_PROFILE_FUNCTION();
-		ASSERTM(m_CurrentBatch == nullptr, "Forgot to call PolygonEnd");
-		for (auto & batch : m_Batches) {
-			if (batch.second->GetNumElements() == 0) continue;
-			Flush(batch.first, batch.second);
-			batch.second->Index = 0;
-		}
-	}
-
-	StrongHandle<Batcher::Batch> Batcher::GetBatch(PrimitiveTopology topology) {
-		auto batch = m_Batches.find(topology);
-		if (batch == m_Batches.end()) {
-			StrongHandle<Batch> newBatch = new Batch(m_MaxVertices);
-			m_Batches.insert(std::make_pair(topology, newBatch));
-			return newBatch;
-		}
-		return batch->second;
-	}
 
 	void Batcher::DrawLine(const Vec2 & start, const Vec2 & end) {
 		PolygonBegin(PrimitiveTopology::TOPOLOGY_LINE);
@@ -156,7 +115,7 @@ namespace prev {
 			pos + Vec2(-halfDimen.x, -halfDimen.y));
 	}
 
-	void prev::Batcher::DrawRectRounded(const Vec2 & pos, const Vec2 & dimen, pvfloat cornerRadius) {
+	void Batcher::DrawRectRounded(const Vec2 & pos, const Vec2 & dimen, pvfloat cornerRadius) {
 		PolygonBegin(PrimitiveTopology::TOPOLOGY_TRIANGLE);
 		const Vec2 centerPos = pos;
 		const Vec2 bottomLeft = pos - dimen / 2.0f;
@@ -171,7 +130,7 @@ namespace prev {
 			bottomLeft + Vec2(cornerRadius, dimen.y - cornerRadius)
 		};
 
-		for (pvuint j = 0; j < 4u; j++) {
+		for (unsigned int j = 0; j < 4u; j++) {
 			positions = DrawRoundRectHelper(angle, cornerRadius, startPositions[j]);
 			if (j == 0)
 				firstPos = positions[0];
@@ -209,7 +168,7 @@ namespace prev {
 			bottomLeft + Vec2(cornerRadius, dimen.y - cornerRadius)
 		};
 
-		for (pvuint j = 0; j < 4; j++) {
+		for (unsigned int j = 0; j < 4; j++) {
 			positions = DrawRoundRectHelper(angle, cornerRadius, startPositions[j]);
 			if (j == 0)
 				firstPos = positions[0];
@@ -243,7 +202,7 @@ namespace prev {
 			bottomLeft + Vec2(cornerRadius, dimen.y - cornerRadius)
 		};
 
-		for (pvuint j = 0; j < 2; j++) {
+		for (unsigned int j = 0u; j < 2u; j++) {
 			positions = DrawRoundRectHelper(angle, cornerRadius, startPositions[j]);
 			if (j == 0)
 				firstPos = positions[0];
@@ -412,14 +371,51 @@ namespace prev {
 		PolygonEnd();
 	}
 
+	void Batcher::DrawCircle(const Vec2 center, const float radius, unsigned int segment) {
+		const float delta_angle = 360.0f / segment;
+
+		PolygonBegin(PrimitiveTopology::TOPOLOGY_TRIANGLE);
+
+		for (unsigned int i = 0; i < segment; ++i) {
+			float angle_0 = delta_angle * i;
+			float angle_1 = delta_angle * (i + 1);
+			Vec2 pos_0 = center + Vec2::UnitCircle(angle_0) * radius;
+			Vec2 pos_1 = center + Vec2::UnitCircle(angle_1) * radius;
+
+			Vertex(center);
+			Vertex(pos_0);
+			Vertex(pos_1);
+		}
+
+		PolygonEnd();
+	}
+
+	void Batcher::DrawCircleWire(const Vec2 center, const float radius, unsigned int segment) {
+		const float delta_angle = 360.0f / segment;
+
+		PolygonBegin(PrimitiveTopology::TOPOLOGY_LINE_STRIP);
+
+		for (unsigned int i = 0; i < segment; ++i) {
+			float angle_0 = delta_angle * i;
+			float angle_1 = delta_angle * (i + 1);
+			Vec2 pos_0 = center + Vec2::UnitCircle(angle_0) * radius;
+			Vec2 pos_1 = center + Vec2::UnitCircle(angle_1) * radius;
+
+			Vertex(pos_0);
+			Vertex(pos_1);
+		}
+
+		PolygonEnd();
+	}
+
 	std::vector<Vec2> Batcher::DrawRoundRectHelper(float startAngle, float radius, Vec2 startPos) {
-		const pvuint numRoundedVerts = 8;
+		const unsigned int numRoundedVerts = 8;
 		const pvfloat roundedCornerAngle = 90.0f;
 		const pvfloat roundedCircledelta_angle = roundedCornerAngle / (numRoundedVerts - 1);
 
 		std::vector<Vec2> positions;
 
-		for (pvuint i = 0; i < numRoundedVerts; ++i) {
+		for (unsigned int i = 0; i < numRoundedVerts; ++i) {
 			float angleRad = startAngle + i * roundedCircledelta_angle;
 			Vec2 unitCircle = Vec2::UnitCircle(angleRad);
 			Vec2 pos = startPos + unitCircle * radius;

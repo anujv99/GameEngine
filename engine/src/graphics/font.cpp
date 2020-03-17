@@ -1,11 +1,12 @@
 #include "font.h"
 
+#include <cstring>
 #include <freetype-gl.h>
 
 namespace prev {
 
-	static constexpr const pvuint TEXTURE_SIZE_X = 1024;
-	static constexpr const pvuint TEXTURE_SIZE_Y = 1024;
+	static constexpr const pvuint TEXTURE_SIZE_X = 128;
+	static constexpr const pvuint TEXTURE_SIZE_Y = 128;
 
 	pvfloat PixelsToPoints(pvfloat pixels) {
 		return static_cast<pvuint>(pixels * 0.75f);
@@ -49,6 +50,21 @@ namespace prev {
 			arr[i + 2] = atlas->data[j];
 			arr[i + 3] = atlas->data[j];
 		}
+
+		pvubyte * buff = new pvubyte[TEXTURE_SIZE_X * 4u];
+
+		if (GraphicsContext::Ref().GetAPI() == GraphicsAPI::API_OPENGL) {
+			for (pvsizet j = 0; j < TEXTURE_SIZE_Y / 2; j++) {
+				pvubyte * begin = arr + TEXTURE_SIZE_X * j * 4u;
+				pvubyte * end = arr + (TEXTURE_SIZE_Y - j - 1) * TEXTURE_SIZE_X * 4u;
+
+				std::memcpy(buff, begin, TEXTURE_SIZE_X * 4u);
+				std::memcpy(begin, end, TEXTURE_SIZE_X * 4u);
+				std::memcpy(end, buff, TEXTURE_SIZE_X * 4u);
+			}
+		}
+
+		delete[] buff;
 
 		m_Texture = Texture2D::Create(Vec2i(TEXTURE_SIZE_X, TEXTURE_SIZE_Y), params);
 		m_Texture->SetData(arr, TEXTURE_SIZE_X * TEXTURE_SIZE_Y * 4);

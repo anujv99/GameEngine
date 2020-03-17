@@ -35,7 +35,7 @@ namespace prev {
 		virtual StrongHandle<Texture2D> GetTexture() = 0;
 		virtual StrongHandle<Texture2D> GetDepthTexture() = 0;
 
-		DECLARE_OBJECT(Framebuffer, Vec2i size, TextureFormat format, FramebufferFlags flags);
+		DECLARE_OBJECT(Framebuffer, Vec2i size, TextureFormat format, FramebufferFlags flags = FRAMEBUFFER_NONE);
 	
 	};
 

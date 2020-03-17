@@ -1,4 +1,6 @@
-#pragma once
+
+#ifndef __BATCHER_H__
+#define __BATCHER_H__
 
 #include <unordered_map>
 #include <vector>
@@ -10,23 +12,23 @@
 namespace prev {
 
 	struct VertexColor {
-		pvubyte r, g, b, a;
+		unsigned char r, g, b, a;
 		VertexColor() : r(0), g(0), b(0), a(0) {}
-		VertexColor(pvubyte val) : r(val), g(val), b(val), a(val) {}
-		VertexColor(pvubyte red, pvubyte green, pvubyte blue, pvubyte alpha) :
+		VertexColor(unsigned char val) : r(val), g(val), b(val), a(val) {}
+		VertexColor(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha) :
 			r(red), g(green), b(blue), a(alpha) {
 		}
-		VertexColor(pvfloat red, pvfloat green, pvfloat blue, pvfloat alpha) : r(0), g(0), b(0), a(0) {
-			r = static_cast<pvubyte>(red	* 255.0f);
-			g = static_cast<pvubyte>(green	* 255.0f);
-			b = static_cast<pvubyte>(blue	* 255.0f);
-			a = static_cast<pvubyte>(alpha	* 255.0f);
+		VertexColor(float red, float green, float blue, float alpha) : r(0), g(0), b(0), a(0) {
+			r = (unsigned char)(red	* 255.0f);
+			g = (unsigned char)(green	* 255.0f);
+			b = (unsigned char)(blue	* 255.0f);
+			a = (unsigned char)(alpha	* 255.0f);
 		}
-		VertexColor(pvfloat val) : r(0), g(0), b(0), a(0) {
-			r = static_cast<pvubyte>(val * 255.0f);
-			g = static_cast<pvubyte>(val * 255.0f);
-			b = static_cast<pvubyte>(val * 255.0f);
-			a = static_cast<pvubyte>(val * 255.0f);
+		VertexColor(float val) : r(0), g(0), b(0), a(0) {
+			r = (unsigned char)(val * 255.0f);
+			g = (unsigned char)(val * 255.0f);
+			b = (unsigned char)(val * 255.0f);
+			a = (unsigned char)(val * 255.0f);
 		}
 	};
 
@@ -42,47 +44,20 @@ namespace prev {
 
 	class Batcher {
 	protected:
-		Batcher(pvsizet maxVertices);
-		~Batcher();
+		Batcher(size_t maxVertices);
+		virtual ~Batcher();
 	public:
 		inline void Color(VertexColor color) { m_CurrentColor = color; }
-		inline void Color(pvubyte color) { m_CurrentColor = VertexColor(color); }
+		inline void Color(unsigned char color) { m_CurrentColor = VertexColor(color); }
 		inline void Color(pvfloat color) { m_CurrentColor = VertexColor(color); }
-		inline void Color(pvubyte r, pvubyte g, pvubyte b, pvubyte a) { m_CurrentColor = VertexColor(r, g, b, a); }
+		inline void Color(unsigned char r, unsigned char g, unsigned char b, unsigned char a) { m_CurrentColor = VertexColor(r, g, b, a); }
 		inline void Color(pvfloat r, pvfloat g, pvfloat b, pvfloat a) { m_CurrentColor = VertexColor(r, g, b, a); }
 		inline void Color(Vec4 col) { m_CurrentColor = VertexColor(col.x, col.y, col.z, col.w); }
 		inline void Color(Vec3 col, float alpha) { m_CurrentColor = VertexColor(col.x, col.y, col.z, alpha); }
 
-		void PolygonBegin(PrimitiveTopology topology);
-		void PolygonEnd();
-
-		void Vertex(const Vec2 & pos);
-	protected:
-		struct Batch : HandledObject<Batch> {
-			friend class Batcher;
-			friend class StrongHandle<Batch>;
-			
-			inline const void * GetData() const { return reinterpret_cast<const void *>(Vertices.data()); }
-			inline pvsizet GetDataSize() const { return Index * sizeof(prev::Vertex); }
-			inline pvsizet GetNumElements() const { return Index; }
-		private:
-			Batch(pvsizet maxSize) : Vertices(), Index(0) { Vertices.resize(maxSize); }
-		private:
-			std::vector<prev::Vertex> Vertices;
-			pvsizet Index;
-		};
-
-		virtual void Flush(PrimitiveTopology prim, const StrongHandle<Batch> batch) = 0;
-
-		void FlushAll();
-	private:
-		StrongHandle<Batch> GetBatch(PrimitiveTopology topology);
-	private:
-		std::unordered_map<PrimitiveTopology, StrongHandle<Batch>> m_Batches;
-		pvsizet m_MaxVertices;
-		pvsizet m_NumVertices;
-		VertexColor m_CurrentColor;
-		StrongHandle<Batch> m_CurrentBatch;
+		virtual void PolygonBegin(PrimitiveTopology topology) = 0;
+		virtual void PolygonEnd() = 0;
+		virtual void Vertex(const Vec2 & pos) = 0;
 	public:
 		void DrawLine(const Vec2 & start, const Vec2 & end);
 		void DrawLineThick(const Vec2 & start, const Vec2 & end, pvfloat thickness);
@@ -100,9 +75,17 @@ namespace prev {
 		void DrawRectRoundedTopWire(const Vec2 pos, const Vec2 dimen, float cornerRadius);
 		void DrawRectRoundedBottom(const Vec2 pos, const Vec2 dimen, float cornerRadius);
 		void DrawRectRoundedBottomWire(const Vec2 pos, const Vec2 dimen, float cornerRadius);
+
+		void DrawCircle(const Vec2 center, const float radius, unsigned int segment = 64);
+		void DrawCircleWire(const Vec2 center, const float radius, unsigned int segment = 64);
+
 		//To Be Continued...
 	private:
 		std::vector<Vec2> DrawRoundRectHelper(float startAngle, float radius, Vec2 startPos);
+	protected:
+		VertexColor m_CurrentColor;
 	};
 
 }
+
+#endif //__BATCHER_H__

@@ -6,6 +6,7 @@
 namespace prev {
 
 	#include "shaders.inl"
+	#include "fboshaders.inl"
 
 	Renderer2D::Renderer2D() {
 		CreateRendererObjects();
@@ -73,13 +74,13 @@ namespace prev {
 
 	void Renderer2D::CreateFramebufferObjects() {
 		float vertices[] = {
-			-1.0f,  1.0f, 0.0f, 1.0f,
-			 1.0f,  1.0f, 1.0f, 1.0f,
-			 1.0f, -1.0f, 1.0f, 0.0f,
+			-1.0f,  1.0f, 0.0f, 0.0f,
+			 1.0f,  1.0f, 1.0f, 0.0f,
+			 1.0f, -1.0f, 1.0f, 1.0f,
 
-			-1.0f,  1.0f, 0.0f, 1.0f,
-			 1.0f, -1.0f, 1.0f, 0.0f,
-			-1.0f, -1.0f, 0.0f, 0.0f,
+			-1.0f,  1.0f, 0.0f, 0.0f,
+			 1.0f, -1.0f, 1.0f, 1.0f,
+			-1.0f, -1.0f, 0.0f, 1.0f,
 		};
 
 		auto fbobuffer = VertexBuffer::Create(vertices, sizeof(vertices), 4 * sizeof(float), BufferUsage::USAGE_STATIC);
@@ -160,6 +161,7 @@ namespace prev {
 
 	void Renderer2D::DrawSprite(Vec2 pos, Vec2 size,
 		Vec2 texCoordTopLeft, Vec2 texCoordBottomRight, Vec4 color, StrongHandle<Texture2D> texture) {
+		if (m_Vertices == nullptr) { LOG_ERROR("Invalid renderer2d state. Did you forget to call Renderer2D::BeginScenet()"); }
 
 		PV_PROFILE_FUNCTION();
 		if (m_VertexIndex + 6 >= MAX_VERTICES) { EndScene(); BeginScene(); }
