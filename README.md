@@ -14,7 +14,7 @@ Some Key Features:
 * clone using ``` git clone --recurse-submodules https://github.com/preversewharf45/GameEngine ```
 * ``` cd GameEngine ```
 * Now the process can vary from platform to platform. Basically it's a CMake project, so you
-  can use your preffered toolset to build it.
+  can use your preferred toolset to build it.
 * For example, If you are using Visual Studio:
 * Simply onen the `GameEngine' folder in Visual Studio
 * Set the startup project to Sandbox and Run.
