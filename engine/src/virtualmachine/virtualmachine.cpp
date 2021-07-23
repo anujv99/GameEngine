@@ -5,6 +5,9 @@
 
 #include "luabind/bindcorelib.h"
 #include "luabind/bindimguilib.h"
+#include "luabind/bindgraphicslib.h"
+#include "luabind/bindmath.h"
+#include "luabind/bindsystemlib.h"
 
 namespace prev {
 
@@ -14,8 +17,11 @@ namespace prev {
 		L = luaL_newstate();
 		luaL_openlibs(L);
 
+		LuaBindMath(L);
 		LuaBindCoreLib(L);
 		LuaBindImGuiLib(L);
+		LuaBindGraphicsLib(L);
+		LuaBindSystemLib(L);
 	}
 
 	VirtualMachine::~VirtualMachine() {

@@ -44,6 +44,12 @@ namespace prev {
 			lua_pushnumber(L, ImGui::SliderFloat(name, val, min, max));
 			return 1;
 		}
+
+		static int Seperator(lua_State * L) {
+			LUA_CHECK_NUM_PARAMS(0);
+			ImGui::Seperator();
+			return 0;
+		}
 	};
 
 	LUA_LIB_START(ImGui)
@@ -51,6 +57,7 @@ namespace prev {
 		LUA_LIB_ENTRY("End", LuaImGuiFunc::End)
 		LUA_LIB_ENTRY("TextInput", LuaImGuiFunc::TextInput)
 		LUA_LIB_ENTRY("SliderFloat", LuaImGuiFunc::SliderFloat)
+		LUA_LIB_ENTRY("Seperator", LuaImGuiFunc::Seperator)
 	LUA_LIB_END(ImGui)
 
 	void LuaBindImGuiLib(lua_State * L) {

@@ -21,6 +21,7 @@ namespace prev {
 		static pvfloat SliderFloat(pvstring name, pvfloat & val, pvfloat min, pvfloat max);
 
 		static Vec3 SliderRGB(pvstring name, Vec3 & val);
+		static Vec4 SliderRGBA(pvstring name, Vec4 & val);
 
 		static int TextInput(const pvstring & name, pvstring & val, pvint width);
 

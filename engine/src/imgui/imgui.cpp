@@ -845,6 +845,32 @@ namespace prev {
 		return val;
 	}
 
+	Vec4 ImGui::SliderRGBA(pvstring name, Vec4 & val) {
+		if (ImGuiIsMinimized()) return val;
+		ImGuiGenWidgetID();
+
+		Print(name);
+
+		// Draw color block
+
+		SameLine();
+		Vec2i pos = ImGuiState().DrawPos;
+		Vec2i dimen = Vec2i(ImGui::FONT_HEIGHT * 2, ImGui::FONT_HEIGHT);
+		ImGuiColor(val.xyz(), val.w);
+		ImGuiDrawRect(pos, dimen);
+		MoveDrawPosNextLine(dimen);
+
+		const Vec4 min(0.0f);
+		const Vec4 max(1.0f);
+
+		SliderFloat(nullptr, val.x, min.x, max.x);
+		SliderFloat(nullptr, val.y, min.y, max.y);
+		SliderFloat(nullptr, val.z, min.z, max.z);
+		SliderFloat(nullptr, val.w, min.w, max.w);
+
+		return val;
+	}
+
 	int ImGui::TextInput(const pvstring & name, pvstring & val, pvint width) {
 
 		const pvfloat KEYPRESS_COOLDOWN = 0.4f;

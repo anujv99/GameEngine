@@ -4,7 +4,7 @@
 
 struct lua_State;
 
-namespace app {
+namespace prev {
 	bool CreateVec2(lua_State * L, float x, float y);
 	bool CreateVec3(lua_State * L, float x, float y, float z);
 	bool CreateVec4(lua_State * L, float x, float y, float z, float w);

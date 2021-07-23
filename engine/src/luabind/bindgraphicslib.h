@@ -4,7 +4,7 @@
 
 struct lua_State;
 
-namespace app {
+namespace prev {
 	void LuaBindGraphicsLib(lua_State * L);
 }
 

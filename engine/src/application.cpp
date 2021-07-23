@@ -30,8 +30,6 @@ static prev::MemoryLeakDetector s_LeakDetector;
 
 namespace prev {
 	
-	StrongHandle<Framebuffer> fbo;
-
 	pvuint NUMBER_OF_DRAW_CALLS = 0u;
 
 	Application::Application() : m_IsWindowOpen(true) {
@@ -91,8 +89,6 @@ namespace prev {
 		RenderState::Ref().SetBlendFunction(func);
 
 		VirtualMachine::Ref().Init(Path::ToResFolderPath("res/scripts/main.lua"));
-
-		fbo = Framebuffer::Create(Vec2i(conf.WindowWidth, conf.WindowHeight), TextureFormat::RGBA);
 	}
 
 	Application::~Application() {
@@ -119,14 +115,7 @@ namespace prev {
 
 			Render();
 			
-			fbo->Bind();
-			fbo->Clear();
-
 			DrawGUI();
-
-			fbo->UnBind();
-
-			Renderer2D::Ref().PassFramebuffer(fbo, nullptr);
 
 			PostUpdate();
 			
@@ -149,12 +138,10 @@ namespace prev {
 		MVPStack::Ref().Projection().Push(m_Camera->GetProjectionView());
 		Renderer2D::Ref().BeginScene();
 
-		Renderer2D::Ref().DrawSprite(Vec2(0.0f), Vec2(1.6f, 1.0f), Vec4(1.0f), fbo->GetTexture());
-
 		VirtualMachine::Ref().Render();
 
 		for (auto & layer : m_LayerStack) {
-			layer->OnUpdate(0.0f);
+			layer->OnUpdate(Timer::GetDeltatTime().GetS());
 		}
 
 		ImmGFX::Ref().Render();

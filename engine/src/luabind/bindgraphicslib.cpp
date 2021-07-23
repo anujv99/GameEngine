@@ -8,27 +8,29 @@
 #include "graphics/framebuffer.h"
 
 #include "renderer/renderer2d.h"
+#include "renderer/immgfx.h"
 
 namespace prev {
 
-	// ------------------------------------ RENDER STATE ------------------------------------
+	// ------------------------------------ IMMIDIATE GRAPHCIS ------------------------------------
 
-	struct LuaBindRenderStateFunc {
-		static int __index(lua_State * L) {
-			return 0;
-		}
-		static int __newindex(lua_State * L) {
+	struct LuaBindImmGFXFunc {
+		static int DrawRect(lua_State * L) {
+			LUA_CHECK_NUM_PARAMS(2);
+			LUA_VEC2_PARAM(1, pos);
+			LUA_VEC2_PARAM(2, dimen);
+
+			ImmGFX::Ref().DrawRect(*pos, *dimen);
 			return 0;
 		}
 	};
 
-	LUA_METATABLE_START(RenderState)
-		LUA_METATABLE_FUNCTION("__index", LuaBindRenderStateFunc::__index)
-		LUA_METATABLE_FUNCTION("__newindex", LuaBindRenderStateFunc::__newindex)
-	LUA_METATBLE_END(RenderState)
+	LUA_LIB_START(ImmGFX)
+		LUA_LIB_ENTRY("DrawRect", LuaBindImmGFXFunc::DrawRect)
+	LUA_LIB_END(ImmGFX)
 
-	void BindRenderStateLib(lua_State * L) {
-
+	void BindImmGFXLib(lua_State * L) {
+		LUA_REGISTER_LIB(ImmGFX);
 	}
 
 	// ------------------------------------ SHADERS ------------------------------------
@@ -448,6 +450,7 @@ namespace prev {
 	}
 
 	void LuaBindGraphicsLib(lua_State * L) {
+		BindImmGFXLib(L);
 		BindShader(L);
 		BindVertexBuffer(L);
 		BindVertexArray(L);
